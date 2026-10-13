@@ -1,0 +1,19 @@
+{
+ "figure": "braun_supp6",
+ "panel": "D_bat_sequence",
+ "params": {
+  "kind": "bat",
+  "path": "data/bat_omer2023/Fig_2.mat",
+  "field": "correct",
+  "fit_paper": {
+   "amp": 0.83,
+   "width": 1.72,
+   "offset": 0.05
+  }
+ },
+ "time": "2026-10-13 20:24:17",
+ "git": {
+  "commit": "8f88420a37ecba17c69a24cbfe73f09ef841bccd",
+  "dirty_seqnet": true
+ }
+}

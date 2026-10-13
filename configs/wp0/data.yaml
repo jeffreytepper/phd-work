@@ -1,0 +1,10 @@
+# Experimental datasets for WP0.7 / WP5 / WP6 (spec D8).  Paths are relative to the repository root.
+bat:
+  kind: bat
+  path: data/bat_omer2023/Fig_2.mat     # Zenodo 10.5281/zenodo.7213099 (CC BY 4.0), Omer, Las & Ulanovsky 2023
+  field: correct                        # Fig_2.panel_a.correct: 166 observer time cells, 0.1-s bins from landing
+  fit_paper: {amp: 0.83, width: 1.72, offset: 0.05}   # Braun Supp. 6F (168 cells, all hanging intervals)
+mec:
+  kind: mec
+  path: null                            # [DATA] session 7, mouse #60584 (Gonzalo Cogno et al. 2024) -- set when available
+  fit_paper: {amp: 0.29, width: 1.68, offset: 0.15}   # Braun Supp. 6C

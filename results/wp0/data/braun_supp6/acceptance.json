@@ -1,0 +1,25 @@
+[
+ {
+  "item": "bat bump fit vs paper (a = 0.83, sigma = 1.72 s, b = 0.05)",
+  "criterion": "each within factor 1.5 (proxy data: 166 cells, correct trials)",
+  "value": {
+   "amp": 0.7914376439463604,
+   "width": 1.1903459968261052,
+   "offset": 0.0644983533153954,
+   "r2": 0.9701176366441515
+  },
+  "passed": true
+ },
+ {
+  "item": "bat fit quality",
+  "criterion": "R^2 >= 0.95 (paper 0.99)",
+  "value": 0.9701176366441515,
+  "passed": true
+ },
+ {
+  "item": "mouse bump fit",
+  "criterion": "blocked [DATA]",
+  "value": null,
+  "passed": null
+ }
+]

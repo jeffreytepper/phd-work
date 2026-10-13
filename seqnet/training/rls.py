@@ -20,7 +20,7 @@ import numpy as np
 from scipy.special import expit
 
 from ..models.rate_rnn import RNNParams, noise_scale
-from ..targets import SequenceSpec
+from ..targets import SequenceSpec, logit_target
 
 __all__ = ["ForceConfig", "train_realization", "realization_rng", "pearson"]
 
@@ -56,6 +56,7 @@ class ForceConfig:
     target_time: Literal["analytic", "bin"] = "analytic"
     weight_decay: float = 0.0
     mask: dict | None = None  # {"kind": "presyn_random"|"presyn_block", "fraction": f}
+    data: dict | None = None  # experimental target, see seqnet.data.registry (overrides N and the synthetic target)
     seed: int = 0
 
     def spec(self) -> SequenceSpec:
@@ -80,19 +81,19 @@ def pearson(a: np.ndarray, b: np.ndarray) -> float:
     return float(a @ b / np.sqrt((a @ a) * (b @ b)))
 
 
-def _mask_columns(cfg: ForceConfig, rng: np.random.Generator) -> np.ndarray | None:
+def _mask_columns(cfg: ForceConfig, rng: np.random.Generator, N: int) -> np.ndarray | None:
     """Presynaptic set L whose outgoing weights are trained (Braun Methods lines 1033-1052)."""
     if not cfg.mask:
         return None
     kind, frac = cfg.mask["kind"], float(cfg.mask["fraction"])
-    n_zero = int(round(frac * cfg.N))
+    n_zero = int(round(frac * N))
     if kind == "presyn_random":
-        zero = rng.choice(cfg.N, n_zero, replace=False)
+        zero = rng.choice(N, n_zero, replace=False)
     elif kind == "presyn_block":
-        zero = np.arange(cfg.N - n_zero, cfg.N)  # the last fraction of neurons in the sequence ordering (Supp. 2E)
+        zero = np.arange(N - n_zero, N)  # the last fraction of neurons in the sequence ordering (Supp. 2E)
     else:
         raise NotImplementedError(f"mask kind {kind!r} (per-synapse masks with per-row P_i) not implemented yet")
-    keep = np.ones(cfg.N, bool)
+    keep = np.ones(N, bool)
     keep[zero] = False
     return keep
 
@@ -106,20 +107,38 @@ def train_realization(cfg: ForceConfig, realization: int, keep_W0: bool = False)
     """
     t_start = time.perf_counter()
     rng = realization_rng(cfg.seed, realization)
-    N, m, K = cfg.N, cfg.m, cfg.steps_per_iter
-    spec, prm = cfg.spec(), cfg.params()
-    J = cfg.g_init / np.sqrt(N) * rng.standard_normal((N, N))
-    t0 = float(rng.uniform(0.0, cfg.snippet_start_max))
-    keep = _mask_columns(cfg, rng)
+    m, K = cfg.m, cfg.steps_per_iter
+    prm = cfg.params()
+    n_up = (K - 1) // m + 1
+    if cfg.data:
+        # experimental target (Braun Methods lines 913-925): rates at bin_size; update u uses target bin start + u
+        from ..data.registry import load_target
+
+        F, bin_size = load_target(cfg.data)
+        N = F.shape[0]
+        J = cfg.g_init / np.sqrt(N) * rng.standard_normal((N, N))
+        sb = cfg.data.get("snippet_bins")
+        start = int(rng.integers(0, F.shape[1] - sb + 1)) if sb else 0
+        idx = np.clip(start + np.arange(n_up), 0, F.shape[1] - 1)
+        t0 = start * bin_size
+        f_z = F[:, idx]
+        x_z = logit_target(f_z, cfg.eps)
+        target = x_z if cfg.error_target == "methods" else x_z + cfg.tau * np.gradient(x_z, m * cfg.dt, axis=1)
+        h_init = x_z[:, 0].copy()
+    else:
+        N = cfg.N
+        spec = cfg.spec()
+        J = cfg.g_init / np.sqrt(N) * rng.standard_normal((N, N))
+        t0 = float(rng.uniform(0.0, cfg.snippet_start_max))
+        ks = np.arange(n_up) * m
+        tz = t0 + (ks * cfg.dt if cfg.target_time == "analytic" else np.arange(n_up) * cfg.bin_size)
+        f_z = spec.rates(tz)  # (N, n_up) target rates
+        target = spec.h_target(tz) if cfg.error_target == "methods" else spec.y_target(tz, cfg.tau)
+        h_init = spec.h_target(np.array([t0]))[:, 0]
+    keep = _mask_columns(cfg, rng, N)
     if keep is not None:
         J[:, ~keep] = 0.0
     J0 = J.copy() if keep_W0 else None
-    n_up = (K - 1) // m + 1
-    ks = np.arange(n_up) * m
-    tz = t0 + (ks * cfg.dt if cfg.target_time == "analytic" else np.arange(n_up) * cfg.bin_size)
-    f_z = spec.rates(tz)  # (N, n_up) target rates
-    target = spec.h_target(tz) if cfg.error_target == "methods" else spec.y_target(tz, cfg.tau)
-    h_init = spec.h_target(np.array([t0]))[:, 0]
     nL = N if keep is None else int(keep.sum())
     P = cfg.p0 * np.eye(nL)
     ns = noise_scale(prm)

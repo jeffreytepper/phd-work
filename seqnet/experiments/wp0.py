@@ -57,6 +57,72 @@ def get(amp: float, width: float, offset: float, settings: str = "dev", store_fu
     return run_condition(cfg, R, label=f"{settings}-{lab}", store_full=store_full, settings=settings)
 
 
+def data_config() -> dict:
+    """configs/wp0/data.yaml."""
+    import yaml
+
+    from .runner import repo_root
+
+    return yaml.safe_load((repo_root() / "configs" / "wp0" / "data.yaml").read_text(encoding="utf-8"))
+
+
+def get_data(name: str, settings: str = "final", store_full=5, **overrides) -> RunResult:
+    """Train or load networks on an experimental target (Braun Fig. 3; spec WP0.7).
+
+    ``name`` is a key of configs/wp0/data.yaml ('bat' or 'mec').  g, m, steps per iteration and snippet length follow
+    Braun's Methods (``seqnet.data.registry.DATA_DEFAULTS``).  Raises FileNotFoundError if the path is not set.
+    """
+    from pathlib import Path
+
+    from ..data.registry import DATA_DEFAULTS
+    from .runner import repo_root
+
+    d = dict(data_config()[name])
+    if not d.get("path") or not (repo_root() / Path(d["path"])).exists():
+        raise FileNotFoundError(f"{name} data not available (configs/wp0/data.yaml: path = {d.get('path')!r})")
+    kind = d["kind"]
+    dd = DATA_DEFAULTS[kind]
+    spec = {"kind": kind, "path": d["path"]}
+    if "field" in d:
+        spec["field"] = d["field"]
+    if dd["snippet_bins"]:
+        spec["snippet_bins"] = dd["snippet_bins"]
+    s = SETTINGS[settings]
+    cfg = ForceConfig(data=spec, g_init=dd["g_init"], m=dd["m"], steps_per_iter=dd["steps_per_iter"],
+                      bin_size=dd["bin_size"], n_train=s["n_train"], n_test=s["n_test"])
+    cfg = replace(cfg, **overrides)
+    from .runner import run_condition as _rc
+
+    return _rc(cfg, s["n_realizations"], label=f"{settings}-data_{name}", store_full=store_full, settings=settings)
+
+
+def get_matched(name: str, which: str = "ours", settings: str = "final", store_full=5) -> RunResult:
+    """Synthetic sequences matched to a dataset's fitted bump (Braun lines 1119-1123; Fig. 3C/E bottom).
+
+    ``which='ours'``: parameters fitted here to the available data (stored by the data notebooks in
+    results/wp0/data/braun_supp6/fit_<name>.json); ``'paper'``: Braun's printed fit.  N equals the dataset's cell count;
+    synthetic settings otherwise (T = 8.5 s, 17-s snippets, g = 1.5).
+    """
+    import json
+
+    from ..data.registry import load_target
+    from .runner import repo_root
+
+    d = data_config()[name]
+    spec = {"kind": d["kind"], "path": d["path"], **({"field": d["field"]} if "field" in d else {})}
+    N = load_target(spec)[0].shape[0]
+    if which == "paper":
+        p = d["fit_paper"]
+    else:
+        p = json.loads((repo_root() / "results" / "wp0" / "data" / "braun_supp6" / f"fit_{name}.json").read_text())
+    amp, width, offset = (round(float(p[k]), 3) for k in ("amp", "width", "offset"))
+    cfg, R = condition(amp, width, offset, settings, N=N)
+    from .runner import run_condition as _rc
+
+    return _rc(cfg, R, label=f"{settings}-matched_{name}_{which}_{label_of(amp, width, offset)}", store_full=store_full,
+               settings=settings)
+
+
 def run_group(group: str, settings: str, store_full=5) -> list[RunResult]:
     out = []
     for amp, width, offset in GROUPS[group]:
@@ -71,13 +137,17 @@ def run_group(group: str, settings: str, store_full=5) -> list[RunResult]:
 
 def main(argv=None):
     ap = argparse.ArgumentParser()
-    ap.add_argument("groups", nargs="+", choices=list(GROUPS) + ["all"])
+    ap.add_argument("groups", nargs="+", choices=list(GROUPS) + ["all", "bat"])
     ap.add_argument("--settings", default="dev", choices=list(SETTINGS))
     ap.add_argument("--store-full", default="5")
     a = ap.parse_args(argv)
     sf = a.store_full if a.store_full == "all" else int(a.store_full)
     groups = list(GROUPS) if a.groups == ["all"] else a.groups
     for g in groups:
+        if g == "bat":
+            r = get_data("bat", a.settings, store_full=sf)
+            print("bat", r.path.name, "test corr", r.summary["corr"][:, -1].mean(), flush=True)
+            continue
         run_group(g, a.settings, store_full=sf)
 
 

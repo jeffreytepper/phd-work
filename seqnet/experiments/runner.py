@@ -114,10 +114,9 @@ def run_condition(
     for v in ("OMP_NUM_THREADS", "MKL_NUM_THREADS", "OPENBLAS_NUM_THREADS"):
         os.environ[v] = "1"  # one BLAS thread per worker process
     t0 = time.time()
-    N = cfg_d["N"]
     n_full = n_realizations if store_full == "all" else int(store_full)
     keep_W0 = {0, n_realizations - 1}
-    sumW = np.zeros((N, N))
+    sumW = None  # sized from the first result (data targets set N from the data)
     profiles, corr, dW, diag, t0s, walls = [], [], [], [], [], []
     flat = []  # centred flattened matrices for pairwise correlations
     R_test0 = f_target0 = None
@@ -127,7 +126,7 @@ def run_condition(
         for r, out in ex.map(_worker, jobs):
             results[r] = True
             J = out["J"]
-            sumW += J
+            sumW = J.copy() if sumW is None else sumW + J
             profiles.append(profile_from_matrix(J))
             corr.append(out["corr"])
             dW.append(out["dW"])

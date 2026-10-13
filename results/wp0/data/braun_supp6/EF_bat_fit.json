@@ -1,0 +1,10 @@
+{
+ "figure": "braun_supp6",
+ "panel": "EF_bat_fit",
+ "params": {},
+ "time": "2026-10-13 20:24:19",
+ "git": {
+  "commit": "8f88420a37ecba17c69a24cbfe73f09ef841bccd",
+  "dirty_seqnet": true
+ }
+}
