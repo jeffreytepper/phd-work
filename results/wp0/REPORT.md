@@ -1,0 +1,98 @@
+# WP0 report: reproducing Braun et al. (2026) (in progress)
+
+Status 2026-10-13. Spec §7. Source: Braun, Nordal, Rambø, Clopath & Gonzalo Cogno (2026), bioRxiv 10.64898/2026.09.02.748960 v1, Methods and supplement.
+
+## Hypothesis
+
+H0: Braun's synthetic results reproduce from the Methods, and learned profiles match Suppl. Cor. 3.2 or §5 quantitatively under one of the two training conventions.
+
+## Code (main package)
+
+| Module | Content | Source |
+| --- | --- | --- |
+| `seqnet/conventions.py` | profile ↔ matrix ↔ eigenvalues, shift, DFTs (the only `np.fft` user) | Braun eq. 11, Suppl. §3 |
+| `seqnet/targets.py` | wrapped Gaussian, sequences, logit target and its derivative, Fourier closed form | Braun eq. 4–6, Suppl. eq. 1–3 |
+| `seqnet/models/rate_rnn.py` | Euler rate RNN with noise; silencing, current and noise perturbations | Braun eq. 1–3, 21–22 |
+| `seqnet/training/rls.py` | FORCE variant with all spec 6.7 switches; presynaptic masks (a), (b) | Braun eq. 7–10, 16–17 |
+| `seqnet/training/readout.py` | downstream rule; thesis wrappers | Braun lines 1264–1275 |
+| `seqnet/analysis/` | profile features (MATLAB `smoothdata`/`findpeaks` emulation), motifs, metrics, perturbation grid | Braun eq. 11–15, lines 1130–1222 |
+| `seqnet/spectral/braun_map.py` | required eigenvalues (both conventions), §5 shrinkage, cutoffs, scaffolding bound, batch ridge | Suppl. §2–5, §7 |
+| `seqnet/experiments/` | cached parallel runs (`results/wp0/runs/<label>-<hash>/meta.json` with config, commit, versions, seeds, wall time); WP0 condition groups and CLI | spec 5.3–5.5 |
+
+Tests in `tests/core/`: T1–T9 and T15 pass. T15 is corrected; see finding 1.
+
+## Notebooks (`notebooks/wp0/`, one per figure, panel by panel)
+
+`braun_fig1`, `braun_supp1`, `braun_fig2`, `braun_supp3` (Supp. 3–5 and Supp. 1F), `braun_fig4`, `braun_supp8`, `braun_supp9`, `braun_fig5` (Fig. 5 and Supp. 10), `wp0_8_supplement_check`.
+
+Data notebooks: `braun_supp6` (bump fits), `braun_fig3` (Fig. 3 and Supp. 7), `braun_fig4_data` (Fig. 4G/H, Supp. 9F–K). Bat panels run now; mouse panels run unchanged once `configs/wp0/data.yaml: mec.path` is set and `seqnet.data.mec.load_session` reads the delivered file format.
+
+**Not done:**
+- MEC panels: Fig. 3E/F, Supp. 6A–C, Supp. 7 circles, Fig. 4H and Supp. 9I–K are blocked on [DATA].
+- Supp. 2 (sparsity, WP0.4): mask type (c), per-row P_i, is not implemented yet.
+- WP0.9 ablations.
+
+## Settings
+
+- **Fig. 1 (WP0.1):** final settings, 50 realisations × (300 + 10) iterations.
+- **Everything else:** dev settings (spec D9), 10 realisations × (100 + 10) iterations.
+- **Cost:** one realisation is ~0.47 s per iteration alone, about twice that with 11 parallel workers on this 6-core machine (memory-bandwidth bound). Runs use one worker per physical core by default.
+
+## [VERIFY] switches (defaults used everywhere unless stated)
+
+| # | Switch | Default used |
+| --- | --- | --- |
+| A1 | `error_target` | `methods`: input trained toward x\* (Methods eq. 7) |
+| A2 | `c_uses_updated_P` | `true`, as printed. Test T9 shows this is *not* the ridge/RLS update; see finding 2 |
+| A3 | `state_reset` | `true`: h reset to h_target(snippet start) each iteration |
+| A4 | `target_time` | `analytic`: target at the exact update time t0 + k·dt |
+| A5 | `smoothdata` Gaussian | std = window/5, window 50, end points shrink |
+| A6 | bat N | 168 (not used yet) |
+| A7 | downstream target bin | 0.0081 s |
+| A8 | Fig. 5D width | 0.5 s |
+| A9 | Supp. 10B parameters | legend (σ = 1 s) |
+| A10 | Fig. 5F/G ranges | Methods values plus figure axes |
+| new | perturbation noise | perturbed and unperturbed runs share the noise realisation (`common_noise`) |
+| new | noise-perturbation gain | legend values (15, 20); the Methods text says 0.1 / 0.0015 |
+
+## Findings so far
+
+1. **T15 correction.** For any matrix with equal row and column sums (e.g. circulant), the centred motifs are exactly τ_div = τ_con = −1/(N−1) and τ_chn = −2τ_rec/(N−1). Spec 6.14 says they vanish identically; they don't, but they are O(1/N).
+2. **The printed FORCE step is not RLS (A2).** Eq. 8 multiplies the standard Sussillo–Abbott update by c = 1/(1 + Rᵀ P_new R) a second time. Single-pass RLS without the extra c reproduces batch ridge (YFᵀ + J0/p)(FFᵀ + I/p)⁻¹ to 1e-6; the printed variant differs by more than 1e-3 (T9). Spec fact 4 (RLS = ridge centred on J0) therefore holds only for the standard update.
+3. **Effective §5 α (A12).** Derived: α_eff = 1/(p·n_s·N), with n_s = updates per iteration × training iterations. It ignores the noise in the realised rates, which adds a ridge of its own (WP0.8 notebook).
+4. **Methods typos noted while implementing:**
+   - The current-injection formula writes W·φ(r_j); this must be φ(h_j).
+   - The noise-injection gains in the text (0.1, 0.0015) contradict the legends (15, 20).
+   - "Each training iteration is … 2086 time bins (= 16.9 s)" counts integration steps, not 0.129-s bins.
+   - Supp. 10's Methods parameters differ from its legend (A9).
+
+## Data (WP0.7)
+
+**Bat.** Braun's bat input was 168 observer time cells (mean z-scored rates over all hanging intervals). The public deposit of Omer, Las & Ulanovsky (2023), Zenodo 10.5281/zenodo.7213099 (CC BY 4.0), holds figure-level data only. The closest matrix is `Fig_2.mat → panel_a.correct`: 166 observer time cells, z-scored, 0.1-s bins from landing, apparently correct trials only. It is used as a **proxy**; the 166-vs-168 difference and the trial selection are recorded deviations. The raw files live in `data/bat_omer2023/` (gitignored, not redistributed).
+
+**Mouse MEC.** Blocked on [DATA] (D8). `seqnet.data.mec` implements the whole pipeline behind a single loader stub and is tested on a synthetic stand-in session. Every mouse cell in the notebooks is written and switches on when the path is set.
+
+## Results
+
+| Item | Reproduced | Paper | Verdict |
+| --- | --- | --- | --- |
+| WP0.1 median pairwise matrix correlation | 0.063 | ≈ 0.07 | pass |
+| WP0.1 median pairwise profile correlation | 0.971 | 0.97–0.98 | pass |
+| WP0.1 test target–response correlation | 0.88 | ≈ 0.8 | pass (higher) |
+| WP0.1 mean matrix regenerates the sequence | corr 0.89 | yes | pass |
+| WP0.1 mean \|ΔW\| still decreasing at iteration 300 | 0.0113 → 0.0110 | yes | pass |
+| Supp. 1G off-diagonal cluster is the diagonal | mean self-weight −1.31, about 5 SD below the off-diagonal | cluster near −1.5 | confirmed |
+| Bat bump fit (proxy data) | a 0.79, σ 1.19 s, b 0.064, R² 0.97 | 0.83, 1.72 s, 0.05, 0.99 | σ narrower (data proxy) |
+| Bat target–response correlation | 0.94 | 0.90 | pass |
+| Bat matched synthetic (our fit / paper fit) | 0.92 / 0.91 | 0.90 | pass |
+| Bat mean matrices, data vs synthetic | corr 0.25 | 0.13 | pass (differ) |
+| Bat profiles, data vs synthetic (our fit) | 0.90 (0.92 with d = 0) | 0.83 | pass |
+| Bat profiles vs synthetic from the paper's fit | 0.68 | — | narrower proxy bump |
+| Bat motifs: τ_chn, τ_con | −0.007, **0.09** | "absent" | τ_con fails (< 0.05 criterion) |
+| Bat perturbations: I = 0.5 has no effect; effect grows with I | min corr 0.99 / 0.91 / 0.57 for I = 0.5 / 2 / 5 | yes | pass |
+
+**Interpretation of the bat motif result.** The data-trained mean matrix shows vertical stripes: presynaptic neurons project with consistent sign. Under Braun eq. 15 this registers as τ_con. Braun report banding only in data-trained networks (mouse τ_div ≈ 0.72); here it appears weakly in τ_con for the bat. τ_rec is 0.04 in the data network versus 0.63 in the synthetic control, matching Supp. 7's "mismatch between data and synthetic motifs". This feeds WP5.1 (banding from heterogeneity).
+
+**Finding 5 (bump-fit procedure).** Braun take the offset as the minimum of the bump (Methods line 1114). For a bump that hasn't decayed to baseline within the 8.5-s window, this biases the fit: a true σ = 1.72 s returns σ̂ = 1.63 and b̂ = 0.086 (test `test_fit_bump_bias_of_minimum_offset`). The synthetic matched control built from fitted parameters is therefore not exactly the bump that was fitted.
+
+**Finding 6 (engineering).** Adding a field to `ForceConfig` silently changed every cache hash, and a notebook started retraining Fig. 1. The hash now ignores late fields left at their defaults, and legacy hashes are still accepted.

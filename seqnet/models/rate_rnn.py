@@ -40,7 +40,7 @@ class Perturbation:
     kind:
       * ``'silence'``: r_i = 0 (h keeps evolving) (Braun eq. 21);
       * ``'current'``: z_i += amplitude (step current I) (Braun lines 1170-1178);
-      * ``'noise'``: z_i += amplitude * sqrt(tau/dt) nu_i (noise gain gain_p) (Braun eq. 22).
+      * ``'noise'``: z_i += amplitude * zeta-scale * nu_i, i.e. eta = gain_p * zeta (Braun eq. 22).
     """
 
     kind: Literal["silence", "current", "noise"]
@@ -94,7 +94,9 @@ def simulate(
                 if p.kind == "current":
                     z[p.mask] += p.amplitude
                 elif p.kind == "noise":
-                    z[p.mask] += p.amplitude * np.sqrt(params.tau / params.dt) * rng.standard_normal(p.mask.sum())
+                    # Braun eq. 22: eta = gain_p * zeta, with zeta = noise_gain sqrt(tau/dt) nu (eq. 2).  Spec 6.3 omits
+                    # the noise_gain factor; the Methods are followed (source wins), so eta = gain_p * noise_scale * nu.
+                    z[p.mask] += p.amplitude * ns * rng.standard_normal(p.mask.sum())
         if k % record_every == 0:
             rec_r.append(r.copy())
             rec_t.append(k)

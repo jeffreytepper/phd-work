@@ -11,6 +11,7 @@ n_iter: 1000
 t_max: 8.4                      # error and correlation over 0 <= t <= 8.4 s at dt = 0.0081 s
 target_dt: 0.0081               # [VERIFY] A7: Methods print bin size 0.0001 s; the upstream input uses 0.0081 s
 seed: 21
+upstream_noise: true            # [VERIFY] Methods keep noise gain 0.5 when running the upstream network; panel I compares noise off
 panels:
   B: {amp: 0.5, width: 1.0, offset: 0.3}
   C: {amp: 0.5, width: 2.0, offset: 0.3}          # paper corr 0.99
