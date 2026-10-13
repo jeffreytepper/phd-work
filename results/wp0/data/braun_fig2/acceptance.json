@@ -1,0 +1,12 @@
+[
+ {
+  "item": "profiles produced for all sweep values",
+  "criterion": "reported (visual comparison with Fig. 2)",
+  "value": {
+   "offset": 10,
+   "width": 9,
+   "amplitude": 9
+  },
+  "passed": null
+ }
+]

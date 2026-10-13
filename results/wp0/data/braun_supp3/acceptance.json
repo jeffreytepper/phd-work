@@ -1,0 +1,69 @@
+[
+ {
+  "item": "asymmetry 10-20 neurons up to b = 0.25",
+  "criterion": "all within [5, 30] (paper 10-20)",
+  "value": [
+   16.0,
+   10.0,
+   11.0,
+   11.0,
+   12.0,
+   13.0
+  ],
+  "passed": true
+ },
+ {
+  "item": "asymmetry at b = 0.45 about 75 neurons",
+  "criterion": "within factor 1.5 of 75",
+  "value": 54.0,
+  "passed": true
+ },
+ {
+  "item": "range falls with width",
+  "criterion": "Spearman-like: corr(width, range) < -0.8",
+  "value": -0.8718048678834952,
+  "passed": true
+ },
+ {
+  "item": "peak width falls with amplitude",
+  "criterion": "corr(amp, peak width) < -0.8",
+  "value": -0.8908129043353226,
+  "passed": true
+ },
+ {
+  "item": "performance rises with amplitude",
+  "criterion": "corr(amp, median test corr) > 0.8",
+  "value": 0.9745785748032733,
+  "passed": true
+ },
+ {
+  "item": "performance falls with offset",
+  "criterion": "corr(offset, median test corr) < -0.8",
+  "value": -0.9439541229370441,
+  "passed": true
+ },
+ {
+  "item": "off-diagonal motifs about 0",
+  "criterion": "|tau_div|, |tau_con|, |tau_chn| < 0.05",
+  "value": 0.05420327956708958,
+  "passed": false
+ },
+ {
+  "item": "tau_rec range",
+  "criterion": "reported (paper 0.55-0.8)",
+  "value": [
+   0.01425243337503026,
+   0.4651939933601902
+  ],
+  "passed": null
+ },
+ {
+  "item": "tau_rec rises with offset and width",
+  "criterion": "corr > 0.5 for both",
+  "value": [
+   0.8007412492574406,
+   0.996261122616787
+  ],
+  "passed": true
+ }
+]

@@ -1,0 +1,30 @@
+[
+ {
+  "item": "(a) random presynaptic: performance kept up to 0.9",
+  "criterion": "test corr >= 0.7 up to fraction >= 0.9",
+  "value": 0.75,
+  "passed": false
+ },
+ {
+  "item": "(b) consecutive block fails beyond ~0.35",
+  "criterion": "largest fraction with test corr >= 0.7 within [0.2, 0.5]",
+  "value": 0.3,
+  "passed": true
+ },
+ {
+  "item": "(c) random synapses: performance kept up to 0.9",
+  "criterion": "test corr >= 0.7 up to fraction >= 0.9 (quick settings)",
+  "value": 0.95,
+  "passed": true
+ },
+ {
+  "item": "profile corr with dense, examples D/E/F",
+  "criterion": "within 0.1 of the paper (0.930 / 0.910 / 0.940)",
+  "value": [
+   0.8684186620685193,
+   0.8264289915185644,
+   0.8836590040171355
+  ],
+  "passed": true
+ }
+]

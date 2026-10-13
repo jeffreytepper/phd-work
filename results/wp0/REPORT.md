@@ -91,6 +91,32 @@ Data notebooks: `braun_supp6` (bump fits), `braun_fig3` (Fig. 3 and Supp. 7), `b
 | Bat motifs: τ_chn, τ_con | −0.007, **0.09** | "absent" | τ_con fails (< 0.05 criterion) |
 | Bat perturbations: I = 0.5 has no effect; effect grows with I | min corr 0.99 / 0.91 / 0.57 for I = 0.5 / 2 / 5 | yes | pass |
 
+### WP0.2–WP0.4 (dev settings: 10 realisations × (100 + 10) iterations)
+
+| Item | Reproduced | Paper | Verdict |
+| --- | --- | --- | --- |
+| Asymmetry, b ≤ 0.25 | 10–16 neurons | 10–20 | pass |
+| Asymmetry, b = 0.45 | 54 | ≈ 75 | pass (within factor 1.5) |
+| Range falls with width | corr −0.87 | yes | pass |
+| Peak width falls with amplitude | corr −0.89 | yes | pass |
+| Performance rises with amplitude, falls with offset | corr +0.97 / −0.94 | yes | pass |
+| τ_rec rises with offset and width | corr 0.80 / 1.00 | yes | pass |
+| τ_rec range | 0.01–0.47 | 0.55–0.8 | lower than the paper |
+| \|τ_div\|, \|τ_con\|, \|τ_chn\| | max 0.054 | ≈ 0 | marginal fail (< 0.05 criterion) |
+| Sparsity (a), random presynaptic | test corr ≥ 0.82 up to 75%; 0.64 at 90%, 0.39 at 95% | kept up to 95% | **fail** beyond 75% (dev settings) |
+| Sparsity (b), consecutive block | ≥ 0.78 up to 30%; 0.68 at 35%, 0.31 at 50% | fails beyond ≈ 35% | pass |
+| Sparsity (c), random synapses | 0.89–0.90 at 75–95% (quick settings) | kept up to 95% | pass |
+| Profile corr with dense (25% presyn, 25% block, 85% synapses) | 0.87 / 0.83 / 0.88 | 0.93 / 0.91 / 0.94 | pass (within 0.1) |
+
+### WP0.8: learned profiles against Suppl. Cor. 3.2 and §5 (new)
+
+- **Fig. 1 condition (final settings).** At k = 1, both conventions match the learned eigenvalue: `methods` within 0.9%, `supplement` within 1.7%. k = 1 is the only mode above the strict strong-mode threshold (|f̂_k|² > 10³ α_eff).
+- **All 28 WP0.2 conditions, k = 1.** Median relative error is 1.6% (`methods`) and 2.1% (`supplement`). It is under 10% in 100% and 96% of conditions respectively, and `methods` is the better convention in 71% of them.
+- **k = 2.** Median error 2.4% / 3.1%; under 10% in 82% / 86% of conditions. The exceptions are high offsets (b ≥ 0.4, 30–50%).
+- **k ≥ 3–4.** Errors are order 1 (median ≈ 100%). These modes lie below the shrinkage scale. The learned eigenvalues do *not* shrink toward 0 as §5 predicts; they sit on a floor at the self-weight (phase ±π). A diagonal of value s adds s to every λ_k, and the learned diagonal is −1.3.
+- **Removing the self-weight** (d = 0 replaced by its neighbours) makes k = 1–2 worse (up to 4.6×). The diagonal is therefore part of how the learned matrix supports the active modes, not a separable artefact. This motivates WP0.9.
+- **Verdict on H0's second part:** Cor. 3.2 holds quantitatively on the strongly represented modes (k ≤ 2) under either convention, with `methods` marginally better. Beyond them, §5's shrinkage toward zero is not what FORCE does; the learned spectrum is pinned by the strongly negative diagonal. Reported as a finding, no tuning.
+
 **Interpretation of the bat motif result.** The data-trained mean matrix shows vertical stripes: presynaptic neurons project with consistent sign. Under Braun eq. 15 this registers as τ_con. Braun report banding only in data-trained networks (mouse τ_div ≈ 0.72); here it appears weakly in τ_con for the bat. τ_rec is 0.04 in the data network versus 0.63 in the synthetic control, matching Supp. 7's "mismatch between data and synthetic motifs". This feeds WP5.1 (banding from heterogeneity).
 
 **Finding 5 (bump-fit procedure).** Braun take the offset as the minimum of the bump (Methods line 1114). For a bump that hasn't decayed to baseline within the 8.5-s window, this biases the fit: a true σ = 1.72 s returns σ̂ = 1.63 and b̂ = 0.086 (test `test_fit_bump_bias_of_minimum_offset`). The synthetic matched control built from fitted parameters is therefore not exactly the bump that was fitted.

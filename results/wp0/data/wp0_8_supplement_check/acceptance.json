@@ -1,0 +1,39 @@
+[
+ {
+  "item": "Fig. 1 condition: better convention within 10% on strong modes",
+  "criterion": "max relative error < 0.1 on modes with |f_k|^2 > 1e3 alpha_eff",
+  "value": {
+   "best": "methods",
+   "max_err": {
+    "supplement": 0.017296673088966322,
+    "methods": 0.009379951351745814
+   },
+   "modes": [
+    1
+   ]
+  },
+  "passed": true
+ },
+ {
+  "item": "WP0.2 sweeps: max relative error on strong modes",
+  "criterion": "reported per convention",
+  "value": {
+   "supplement": 0.8554996625275461,
+   "methods": 0.8534489035892029,
+   "supplement_nodiag": 0.7561293609760533,
+   "methods_nodiag": 0.8179143797540934
+  },
+  "passed": null
+ },
+ {
+  "item": "WP0.2 sweeps: max relative error at k = 1, 2",
+  "criterion": "reported per convention (with and without the self-weight)",
+  "value": {
+   "supplement": 0.8554996625275461,
+   "methods": 0.8534489035892029,
+   "supplement_nodiag": 4.639239775339993,
+   "methods_nodiag": 4.759727296054881
+  },
+  "passed": null
+ }
+]
