@@ -1,0 +1,10 @@
+{
+ "figure": "braun_fig5",
+ "panel": "I_noise_free",
+ "params": {},
+ "time": "2026-10-13 22:28:26",
+ "git": {
+  "commit": "b607309b286fca04f13a29a77c0a7976b1b4b9ce",
+  "dirty_seqnet": false
+ }
+}

@@ -2,9 +2,9 @@
  "figure": "braun_fig4_data",
  "panel": "G_bat",
  "params": {},
- "time": "2026-10-13 20:30:26",
+ "time": "2026-10-13 22:07:10",
  "git": {
-  "commit": "fdc0848a13334567e47d0b3d5f85d8fe8a075d46",
+  "commit": "b607309b286fca04f13a29a77c0a7976b1b4b9ce",
   "dirty_seqnet": false
  }
 }

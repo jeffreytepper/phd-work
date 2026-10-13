@@ -1,0 +1,36 @@
+[
+ {
+  "item": "silencing the active ensemble resets the sequence",
+  "criterion": "aligned correlation at the active window < 0.5 and off-window > 0.8",
+  "value": [
+   0.9964938352205923,
+   0.6337178311714846,
+   -0.4159813561116262,
+   0.5868486657877705,
+   0.9950258324002702
+  ],
+  "passed": true
+ },
+ {
+  "item": "reset distance predicted by the profile minimum",
+  "criterion": "reported: |measured| - |d_min| (neurons)",
+  "value": {
+   "d_min": -230,
+   "measured": [
+    -104,
+    -70,
+    -86,
+    -100,
+    -84
+   ],
+   "abs_error": [
+    126,
+    160,
+    144,
+    130,
+    146
+   ]
+  },
+  "passed": null
+ }
+]

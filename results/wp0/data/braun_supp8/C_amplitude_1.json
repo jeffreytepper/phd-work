@@ -1,0 +1,14 @@
+{
+ "figure": "braun_supp8",
+ "panel": "C_amplitude_1",
+ "params": {
+  "amp": 0.8,
+  "width": 1.0,
+  "offset": 0.0
+ },
+ "time": "2026-10-13 22:05:16",
+ "git": {
+  "commit": "b607309b286fca04f13a29a77c0a7976b1b4b9ce",
+  "dirty_seqnet": false
+ }
+}

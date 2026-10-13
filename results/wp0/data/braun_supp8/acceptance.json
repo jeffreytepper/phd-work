@@ -1,0 +1,30 @@
+[
+ {
+  "item": "reset distance equals the profile-minimum distance (Braun Supp. 8 claim)",
+  "criterion": "median error < 50 neurons for the global or the nearest local minimum",
+  "value": {
+   "global_min": {
+    "median_abs_error": 116.0,
+    "corr": -0.3471591932312398
+   },
+   "near_min": {
+    "median_abs_error": 78.0,
+    "corr": -0.23656224685895624
+   },
+   "zero_cross": {
+    "median_abs_error": 13.0,
+    "corr": -0.05853668617118396
+   }
+  },
+  "passed": false
+ },
+ {
+  "item": "alternative predictor: zero crossing of the profile",
+  "criterion": "reported",
+  "value": {
+   "median_abs_error": 13.0,
+   "corr": -0.05853668617118396
+  },
+  "passed": null
+ }
+]

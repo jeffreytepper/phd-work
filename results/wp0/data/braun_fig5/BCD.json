@@ -1,0 +1,10 @@
+{
+ "figure": "braun_fig5",
+ "panel": "BCD",
+ "params": {},
+ "time": "2026-10-13 22:09:35",
+ "git": {
+  "commit": "b607309b286fca04f13a29a77c0a7976b1b4b9ce",
+  "dirty_seqnet": false
+ }
+}

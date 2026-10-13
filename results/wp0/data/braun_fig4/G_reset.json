@@ -1,0 +1,10 @@
+{
+ "figure": "braun_fig4",
+ "panel": "G_reset",
+ "params": {},
+ "time": "2026-10-13 22:05:54",
+ "git": {
+  "commit": "b607309b286fca04f13a29a77c0a7976b1b4b9ce",
+  "dirty_seqnet": false
+ }
+}

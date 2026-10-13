@@ -1,0 +1,81 @@
+[
+ {
+  "item": "wide targets learned",
+  "criterion": "corr >= 0.99 for sigma_d >= 1 s",
+  "value": [
+   0.9266609423451718,
+   0.9287263400712663,
+   0.9270427214689337,
+   0.921359046322655,
+   0.9106633436301064,
+   0.8932557200067288,
+   0.8666450353511435
+  ],
+  "passed": false
+ },
+ {
+  "item": "narrow target sigma_d = 0.4 s",
+  "criterion": "corr about 0.8 (|x - 0.8| < 0.1)",
+  "value": 0.8689225385922609,
+  "passed": true
+ },
+ {
+  "item": "insensitive to amplitude",
+  "criterion": "all corr > 0.95",
+  "value": [
+   0.44330238582157616,
+   0.8289734429213566,
+   0.9266609423451718,
+   0.9723635281680013,
+   0.9924640318318477,
+   0.9976835203236302,
+   0.9986581284306426,
+   0.9990916889646838
+  ],
+  "passed": false
+ },
+ {
+  "item": "insensitive to offset",
+  "criterion": "all corr > 0.95",
+  "value": [
+   0.9265836706330027,
+   0.9265991951680826,
+   0.9266609423451718,
+   0.9267036001208939,
+   0.9265174810978265,
+   0.9252302124763324
+  ],
+  "passed": false
+ },
+ {
+  "item": "wide targets learned with a noise-free upstream run ([VERIFY] alternative)",
+  "criterion": "corr >= 0.99 for sigma_d >= 1 s",
+  "value": [
+   0.9940738743332578,
+   0.9983341175106685,
+   0.9990649102923433,
+   0.9991311378477028,
+   0.9990822362357833,
+   0.9989773480843809,
+   0.9988002277621552
+  ],
+  "passed": true
+ },
+ {
+  "item": "T18: |A|_2 >= scaffolding bound where sigma_d < sigma_u",
+  "criterion": "for m = 1 (the bound that applies to every retained mode)",
+  "value": {
+   "norm": [
+    4.601157614508561,
+    4.601256135262128,
+    4.6015228942669095
+   ],
+   "bound_m1": [
+    0.07109009089620975,
+    0.10096477142322771,
+    0.12470559992196797
+   ]
+  },
+  "passed": true
+ }
+]

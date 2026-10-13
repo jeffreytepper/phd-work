@@ -1,0 +1,34 @@
+{
+ "figure": "braun_fig4",
+ "panel": "responses",
+ "params": {
+  "settings": "dev",
+  "target": {
+   "amp": 0.6,
+   "width": 1.0,
+   "offset": 0.0
+  },
+  "realisation": 0,
+  "n_steps": 2099,
+  "window_steps": 209,
+  "n_windows": 5,
+  "f_E": 0.2,
+  "example": {
+   "ensemble": 2,
+   "window": 2
+  },
+  "current": 3.0,
+  "noise": {
+   "fraction": 0.5,
+   "gain": 15.0
+  },
+  "example_neuron": 250,
+  "seed": 7,
+  "common_noise": true
+ },
+ "time": "2026-10-13 22:05:46",
+ "git": {
+  "commit": "b607309b286fca04f13a29a77c0a7976b1b4b9ce",
+  "dirty_seqnet": false
+ }
+}

@@ -1,0 +1,10 @@
+{
+ "figure": "braun_fig5",
+ "panel": "S10_DE",
+ "params": {},
+ "time": "2026-10-13 22:30:41",
+ "git": {
+  "commit": "b607309b286fca04f13a29a77c0a7976b1b4b9ce",
+  "dirty_seqnet": false
+ }
+}
