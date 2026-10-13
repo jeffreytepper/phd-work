@@ -1,0 +1,24 @@
+[
+ {
+  "item": "eq. 6.6/6.6' match exact expected error (sum-of-squares convention)",
+  "criterion": "< 5%",
+  "value": 8.758861318300695e-12,
+  "passed": true
+ },
+ {
+  "item": "eq. 6.6' with the printed 1/T noise factor",
+  "criterion": "< 5% (reported)",
+  "value": 0.9921840706542241,
+  "passed": false
+ },
+ {
+  "item": "panel F sums vs printed values (checks the parameter inference)",
+  "criterion": "ratio within [0.5, 2]",
+  "value": [
+   0.7461847541719464,
+   1.2969994091724693,
+   0.9661381947310244
+  ],
+  "passed": true
+ }
+]

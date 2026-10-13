@@ -1,0 +1,15 @@
+{
+ "figure": "fig5",
+ "panel": "E_kernel_factor",
+ "params": {
+  "kernels": {
+   "matched": 0.08,
+   "narrow": 0.015,
+   "wide": 0.8
+  },
+  "lambda": 0.001
+ },
+ "time": "2026-10-13 18:35:32",
+ "numpy": "2.5.4",
+ "python": "3.12.13"
+}

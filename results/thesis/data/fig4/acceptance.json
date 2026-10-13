@@ -1,0 +1,55 @@
+[
+ {
+  "item": "aliasing error matches eq. 6.8",
+  "criterion": "|measured excess - eq.6.8| / eq.6.8 < 5% for d > 1",
+  "value": [
+   1.2734682515891138,
+   0.791421815859982,
+   0.5280648734759112,
+   0.2973334553337784
+  ],
+  "passed": false
+ },
+ {
+  "item": "uncertainty bound holds",
+  "criterion": "sigma_x sigma_xi >= 1/2 for all families",
+  "value": [
+   0.500000000000001,
+   1.6687174012752735,
+   4.733967283971741,
+   0.5,
+   0.4998078411084421
+  ],
+  "passed": true
+ },
+ {
+  "item": "Gaussian saturates the bound",
+  "criterion": "|product - 1/2| < 1e-2",
+  "value": [
+   0.5,
+   0.4998078411084421
+  ],
+  "passed": true
+ },
+ {
+  "item": "r_eff vs figure (reported)",
+  "criterion": "reported only",
+  "value": {
+   "reproduced": [
+    15,
+    10,
+    6,
+    4,
+    2
+   ],
+   "figure": [
+    25,
+    10,
+    6,
+    4,
+    2
+   ]
+  },
+  "passed": null
+ }
+]

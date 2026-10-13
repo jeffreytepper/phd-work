@@ -1,0 +1,13 @@
+{
+ "figure": "fig5",
+ "panel": "B_bias_variance",
+ "params": {
+  "noise_levels": [
+   0.01,
+   0.1
+  ]
+ },
+ "time": "2026-10-13 18:35:31",
+ "numpy": "2.5.4",
+ "python": "3.12.13"
+}

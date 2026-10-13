@@ -1,0 +1,48 @@
+{
+ "figure": "fig4",
+ "panel": "B_uncertainty",
+ "params": {
+  "N": 512,
+  "families": {
+   "Point": [
+    "gaussian",
+    {
+     "sigma": 0.025
+    },
+    2.45
+   ],
+   "Gabor": [
+    "gabor",
+    {
+     "sigma": 0.29,
+     "xi0": 8.0
+    },
+    1.38
+   ],
+   "Box": [
+    "box",
+    {
+     "R": 1.2
+    },
+    2.0
+   ],
+   "Gaussian med": [
+    "gaussian",
+    {
+     "sigma": 0.29
+    },
+    0.5
+   ],
+   "Gaussian wide": [
+    "gaussian",
+    {
+     "sigma": 1.0
+    },
+    0.5
+   ]
+  }
+ },
+ "time": "2026-10-13 18:33:56",
+ "numpy": "2.5.4",
+ "python": "3.12.13"
+}

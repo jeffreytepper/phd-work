@@ -181,22 +181,28 @@ def _target_cov(S: np.ndarray, N: int, c1: np.ndarray, c2: np.ndarray) -> np.nda
 def expected_error(
     kernel: Kernel,
     S: np.ndarray,
-    schedule: Schedule,
+    schedule: Schedule | None,
     decay: float,
     eval_on: Literal["observations", "ring", "fine"] = "observations",
     n_fine: int = 1024,
     noise_var: float = 0.0,
+    positions: np.ndarray | None = None,
 ) -> float:
     """Exact expectation of the error measured by :func:`measure_error`, over a stationary target class.
 
     Linear algebra instead of sampling: w = A y_obs with A = (X^T X + lambda I)^{-1} X^T, so the error at the
     evaluation positions is linear in the Gaussian/random-phase target and its expectation is a trace
     against the target covariance (any distribution with the same second moments gives the same value).
+    ``positions`` overrides ``schedule`` with arbitrary observation positions.
     """
     N = kernel.N
-    X = design_matrix(kernel, schedule)
-    co = schedule.positions
     r = Ring(N).positions
+    if positions is not None:  # arbitrary observation positions (e.g. T = floor(N/d) samples at spacing d)
+        co = np.asarray(positions, dtype=float)
+        X = kernel((r[None, :] - co[:, None]).ravel()).reshape(co.size, N)
+    else:
+        X = design_matrix(kernel, schedule)
+        co = schedule.positions
     A = np.linalg.solve(X.T @ X + decay * np.eye(N), X.T)
     if eval_on == "observations":
         ce, Xe, scale = co, X, 1.0

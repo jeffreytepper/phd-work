@@ -1,0 +1,13 @@
+{
+ "figure": "fig5",
+ "panel": "A_decomposition",
+ "params": {
+  "kernel": "matched",
+  "noise": 0.01,
+  "T": 32,
+  "lambda": 0.001
+ },
+ "time": "2026-10-13 18:35:30",
+ "numpy": "2.5.4",
+ "python": "3.12.13"
+}
