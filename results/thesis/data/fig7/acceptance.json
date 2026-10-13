@@ -1,0 +1,46 @@
+[
+ {
+  "item": "T* = 2M* at each budget",
+  "criterion": "exact",
+  "value": {
+   "M": [
+    6,
+    32,
+    63,
+    89
+   ],
+   "T": [
+    12,
+    64,
+    126,
+    178
+   ]
+  },
+  "passed": true
+ },
+ {
+  "item": "error decreasing in B0",
+  "criterion": "non-increasing over the sweep",
+  "value": 0.0,
+  "passed": true
+ },
+ {
+  "item": "M* vs printed values (lambda calibrated)",
+  "criterion": "|M* - fig| <= 1",
+  "value": {
+   "reproduced": [
+    6,
+    32,
+    63,
+    89
+   ],
+   "figure": [
+    5,
+    32,
+    64,
+    89
+   ]
+  },
+  "passed": true
+ }
+]

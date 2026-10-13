@@ -1,0 +1,15 @@
+# Thesis Fig. 6: kernel families against the Wiener optimum (thesis PDF p. 81).  [D11]
+# From the figure: families narrow Gaussian, wide Gaussian, box, B-spline p = 1, and the Wiener-optimal kernel;
+# printed readout RMSEs 0.28, 0.44, 0.23, 0.43, 0.0095.  The target oscillates at roughly 10-15 cycles per ring,
+# so a narrowband class is used.  All kernels share one spectral budget K0 (Thesis eq. 7.3).
+N: 128
+target: {kind: narrowband, xi0: 12.0, ell: 2.0}
+K0_per_mode: 1.0          # K0 = N * K0_per_mode (average a_m = 1 in D10 units)
+decay: 0.1                # lambda in the same units
+seed: 6
+families:
+  Narrow Gaussian: [gaussian, {sigma: 0.15}]
+  Wide Gaussian: [gaussian, {sigma: 0.6}]
+  Box: [box, {R: 0.7}]
+  B-spline p=1: [bspline, {p: 1, h: 1.2}]
+figure_rmse: [0.28, 0.44, 0.23, 0.43, 0.0095]

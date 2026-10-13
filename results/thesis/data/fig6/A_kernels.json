@@ -1,0 +1,37 @@
+{
+ "figure": "fig6",
+ "panel": "A_kernels",
+ "params": {
+  "K0": 128.0,
+  "families": {
+   "Narrow Gaussian": [
+    "gaussian",
+    {
+     "sigma": 0.15
+    }
+   ],
+   "Wide Gaussian": [
+    "gaussian",
+    {
+     "sigma": 0.6
+    }
+   ],
+   "Box": [
+    "box",
+    {
+     "R": 0.7
+    }
+   ],
+   "B-spline p=1": [
+    "bspline",
+    {
+     "p": 1,
+     "h": 1.2
+    }
+   ]
+  }
+ },
+ "time": "2026-10-13 18:36:33",
+ "numpy": "2.5.4",
+ "python": "3.12.13"
+}
