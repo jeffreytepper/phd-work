@@ -1,0 +1,58 @@
+[
+ {
+  "item": "bat: small current (I = 0.5) leaves the sequence unaffected",
+  "criterion": "all aligned correlations > 0.9",
+  "value": [
+   0.9968069018260606,
+   0.9989305880191128,
+   0.9966662518398721,
+   0.992787771622034,
+   0.9922254649138769
+  ],
+  "passed": true
+ },
+ {
+  "item": "bat: correlation decreases with current magnitude",
+  "criterion": "min over windows decreasing in I",
+  "value": [
+   0.9922254649138769,
+   0.9050975455162871,
+   0.5701523575261661
+  ],
+  "passed": true
+ },
+ {
+  "item": "bat: silencing curves (reported)",
+  "criterion": "reported",
+  "value": {
+   "0.1": [
+    0.9107215040049688,
+    0.8643408602046213,
+    0.7299958823317099,
+    0.9046464146755152,
+    0.9791420918438462
+   ],
+   "0.2": [
+    0.7857175078396207,
+    0.7151698498974312,
+    0.4547162298741679,
+    0.8625719014601134,
+    0.8363468169751028
+   ],
+   "0.3": [
+    0.6924347074392788,
+    0.5610850944209353,
+    0.17120068075568995,
+    0.383165985238534,
+    0.9179144668803406
+   ]
+  },
+  "passed": null
+ },
+ {
+  "item": "mouse panels (Fig. 4H, Supp. 9I-K)",
+  "criterion": "blocked [DATA]",
+  "value": null,
+  "passed": null
+ }
+]

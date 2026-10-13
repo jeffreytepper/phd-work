@@ -1,0 +1,41 @@
+[
+ {
+  "item": "matrices differ across realisations",
+  "criterion": "median pairwise matrix correlation < 0.15 (paper ~0.07)",
+  "value": 0.06259056760974675,
+  "passed": true
+ },
+ {
+  "item": "profiles agree across realisations",
+  "criterion": "median pairwise profile correlation > 0.95 (paper 0.97-0.98)",
+  "value": 0.9713677410118955,
+  "passed": true
+ },
+ {
+  "item": "test target-response correlation",
+  "criterion": "about 0.8 (reported; |x - 0.8| < 0.1)",
+  "value": 0.8756385513084228,
+  "passed": true
+ },
+ {
+  "item": "mean |dW| still decreasing at the end of training",
+  "criterion": "mean over last 10 train iterations < mean over the 10 before",
+  "value": [
+   0.011307981041563152,
+   0.010974381810928578
+  ],
+  "passed": true
+ },
+ {
+  "item": "mean matrix generates the sequence",
+  "criterion": "corr(dynamics, target) > 0.5 (reported)",
+  "value": 0.8918748115933389,
+  "passed": true
+ },
+ {
+  "item": "self-weights (diagonal) strongly negative",
+  "criterion": "reported",
+  "value": -1.3080520753708822,
+  "passed": null
+ }
+]

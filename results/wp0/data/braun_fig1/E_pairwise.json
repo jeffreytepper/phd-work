@@ -1,0 +1,10 @@
+{
+ "figure": "braun_fig1",
+ "panel": "E_pairwise",
+ "params": {},
+ "time": "2026-10-13 20:52:37",
+ "git": {
+  "commit": "fdc0848a13334567e47d0b3d5f85d8fe8a075d46",
+  "dirty_seqnet": true
+ }
+}

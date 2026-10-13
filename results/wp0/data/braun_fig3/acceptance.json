@@ -1,0 +1,50 @@
+[
+ {
+  "item": "bat: target-response correlation",
+  "criterion": "about 0.90 (|x - 0.9| < 0.07)",
+  "value": 0.9369594703466941,
+  "passed": true
+ },
+ {
+  "item": "bat: synthetic matched control learned",
+  "criterion": "corr > 0.8 (paper 0.90)",
+  "value": 0.9230357076744273,
+  "passed": true
+ },
+ {
+  "item": "bat: mean matrices differ (exp vs synthetic)",
+  "criterion": "corr < 0.3 (paper 0.13)",
+  "value": 0.24583929247301634,
+  "passed": true
+ },
+ {
+  "item": "bat: profiles agree (exp vs synthetic, ours)",
+  "criterion": "corr > 0.6 (paper 0.83)",
+  "value": {
+   "with_d0": 0.9183104894302753,
+   "without_d0": 0.8997060032034896
+  },
+  "passed": true
+ },
+ {
+  "item": "bat: profile agreement with the paper's fit",
+  "criterion": "reported",
+  "value": 0.6810988805987052,
+  "passed": null
+ },
+ {
+  "item": "bat motifs: chain and convergent about 0",
+  "criterion": "|tau_chn|, |tau_con| < 0.05",
+  "value": [
+   -0.006596339350294272,
+   0.09037133199656294
+  ],
+  "passed": false
+ },
+ {
+  "item": "mouse panels (E, F; Supp. 7 circles)",
+  "criterion": "blocked [DATA]",
+  "value": null,
+  "passed": null
+ }
+]

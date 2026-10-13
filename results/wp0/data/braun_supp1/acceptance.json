@@ -1,0 +1,18 @@
+[
+ {
+  "item": "Supp. 1G separate cluster is the diagonal",
+  "criterion": "after training the mean self-weight lies far below the off-diagonal mass (< -3 SD)",
+  "value": {
+   "mean_diag": -1.3103794865246827,
+   "offdiag_mean": -0.010838206679889488,
+   "offdiag_sd": 0.25401305082997155
+  },
+  "passed": true
+ },
+ {
+  "item": "test correlation about 0.8",
+  "criterion": "|x - 0.8| < 0.1",
+  "value": 0.8756385513084229,
+  "passed": true
+ }
+]

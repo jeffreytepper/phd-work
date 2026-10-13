@@ -53,8 +53,22 @@ def git_info() -> dict:
         return {"commit": None, "dirty_seqnet": None}
 
 
+# config fields added after runs were cached; omitted from the hash while at their default so old caches stay valid
+_LATE_DEFAULTS = {"data": None}
+
+
+def _strip_late(d):
+    if isinstance(d, dict):
+        out = {k: _strip_late(v) for k, v in d.items()}
+        for k, default in _LATE_DEFAULTS.items():
+            if k in out and out[k] == default:
+                del out[k]
+        return out
+    return d
+
+
 def config_hash(d: dict) -> str:
-    return hashlib.sha1(json.dumps(d, sort_keys=True).encode()).hexdigest()[:10]
+    return hashlib.sha1(json.dumps(_strip_late(d), sort_keys=True).encode()).hexdigest()[:10]
 
 
 def _worker(args):
@@ -103,6 +117,10 @@ def run_condition(
     h = config_hash(key)
     base = (root or repo_root() / "results" / "wp0" / "runs")
     path = base / f"{label}-{h}"
+    # runs cached between adding a config field and _LATE_DEFAULTS used the full-dict hash; accept those too
+    h_full = hashlib.sha1(json.dumps(key, sort_keys=True).encode()).hexdigest()[:10]
+    if not (path / "summary.npz").exists() and (base / f"{label}-{h_full}" / "summary.npz").exists():
+        path, h = base / f"{label}-{h_full}", h_full
     if (path / "summary.npz").exists() and not force:
         meta = json.loads((path / "meta.json").read_text(encoding="utf-8"))
         with np.load(path / "summary.npz") as z:
