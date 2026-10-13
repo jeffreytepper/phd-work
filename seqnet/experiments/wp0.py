@@ -138,6 +138,23 @@ SPARSITY = {
 }
 
 
+# WP0.9 ablations on the Fig. 1 target (spec Section 7): name -> ForceConfig overrides
+ABLATIONS = {
+    "baseline": {},
+    "noise_off": {"noise_gain": 0.0},
+    "p0_0.008": {"p0": 0.008},
+    "p0_0.8": {"p0": 0.8},
+    "standard_rls": {"c_uses_updated_P": False},
+    "supplement_target": {"error_target": "supplement"},
+    "no_state_reset": {"state_reset": False},
+}
+
+
+def get_ablation(name: str, settings: str = "dev") -> RunResult:
+    """WP0.9 condition: a = 0.5, sigma = 1.7 s, b = 0 with one switch changed."""
+    return get(0.5, 1.7, 0.0, settings, **ABLATIONS[name])
+
+
 def get_sparse(kind: str, fraction: float, settings: str | None = None) -> RunResult:
     """Supp. 2 condition: a = 0.5, sigma = 1.7 s, b = 0 with a sparsity mask (Braun lines 1031-1074)."""
     st = settings or SPARSITY[kind][0]
@@ -160,13 +177,19 @@ def run_group(group: str, settings: str, store_full=5) -> list[RunResult]:
 
 def main(argv=None):
     ap = argparse.ArgumentParser()
-    ap.add_argument("groups", nargs="+", choices=list(GROUPS) + ["all", "bat", "sparsity"])
+    ap.add_argument("groups", nargs="+", choices=list(GROUPS) + ["all", "bat", "sparsity", "ablations"])
     ap.add_argument("--settings", default="dev", choices=list(SETTINGS))
     ap.add_argument("--store-full", default="5")
     a = ap.parse_args(argv)
     sf = a.store_full if a.store_full == "all" else int(a.store_full)
     groups = list(GROUPS) if a.groups == ["all"] else a.groups
     for g in groups:
+        if g == "ablations":
+            for name in ABLATIONS:
+                r = get_ablation(name, a.settings)
+                print("ablation", name, r.path.name, "test corr", round(float(r.summary["corr"][:, -1].mean()), 3),
+                      "mean diag", round(float(r.summary["diag_mean"].mean()), 3), flush=True)
+            continue
         if g == "sparsity":
             for kind, (st, fr) in SPARSITY.items():
                 for f in fr:

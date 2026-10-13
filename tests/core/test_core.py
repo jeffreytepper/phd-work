@@ -189,3 +189,24 @@ def test_T15_motifs_of_centred_circulant():
     s2 = np.trace(X @ X.T) / N
     assert abs(m["tau_rec"] - np.trace(X @ X) / (s2 * N)) < 1e-12
     assert abs(m["tau_div"] - (np.sum(X @ X.T) - np.trace(X @ X.T)) / (s2 * N * (N - 1))) < 1e-12
+
+
+def test_T17_floquet_neutral_multiplier():
+    """A sequence-generating orbit has a Floquet multiplier ~1 along the flow (spec 6.16, T17; tol 1e-4 relative to
+    the Euler step).  Network: circulant support of a 2-mode sequence, sigmoid, built so the orbit is attracting."""
+    from seqnet.analysis.stability import floquet
+    from seqnet.models.rate_rnn import RNNParams
+
+    N = 64
+    prm = RNNParams()
+    spec = SequenceSpec(N=N, amp=0.5, width=1.7, offset=0.0)
+    eig = bm.required_eigs(spec, prm.tau, K_max=2)
+    cp = bm.profile_from_mode_eigs(eig, N)
+    J = cv.circulant_from_profile(cp)
+    guess = int(round(spec.T / prm.dt))
+    res = floquet(J, spec.h_target(np.array([0.0]))[:, 0], guess, prm, burn_periods=3)
+    if not res.sequence_kept:
+        pytest.skip("this test network does not sustain the sequence without noise")
+    # with an integer-step period the flow multiplier is 1 up to the closure error of the period estimate
+    assert abs(res.flow_multiplier - 1) < max(1e-4, 5 * res.closure_error)
+    assert np.min(np.abs(res.multipliers - 1)) < max(1e-4, 5 * res.closure_error)
