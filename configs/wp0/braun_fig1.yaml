@@ -1,0 +1,12 @@
+# Braun et al. (2026) Fig. 1 (WP0.1): degeneracy and the common connectivity profile.
+# Target: amplitude 0.5, width 1.7 s, offset 0 (Fig. 1 legend); N = 501, T = 8.5 s; FORCE variant of Methods eq. 7-9.
+settings: final            # final = 50 realizations, 300 training + 10 test iterations (Braun); dev = 10, 100 + 10
+target: {amp: 0.5, width: 1.7, offset: 0.0}
+store_full: all            # keep all 50 matrices (pairwise correlations, Supp. 1G)
+display_clip: 0.3          # weight colour range, as in Fig. 1D/F
+dynamics_seconds: 17.0     # Fig. 1F right: dynamics from the mean matrix
+seed_dynamics: 123
+paper:                     # values quoted in the legend / spec WP0.1 targets
+  matrix_corr_example: 0.07
+  profile_corr_example: 0.98
+  test_corr: 0.8

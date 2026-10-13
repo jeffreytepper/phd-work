@@ -1,0 +1,16 @@
+# Braun et al. (2026) Fig. 4 (WP0.5): structured and unstructured perturbations of a trained synthetic network.
+# Network: a = 0.6, sigma = 1 s, b = 0 (legend), realisation 1.  Run 17 s (2 sequences), first half split into 5 windows
+# of 1.7 s (209 steps).  Ensemble size 100 neurons (f_E = 0.2).
+settings: dev
+target: {amp: 0.6, width: 1.0, offset: 0.0}
+realisation: 0
+n_steps: 2099              # 17 s at dt = 0.0081 s
+window_steps: 209          # 1.7 s
+n_windows: 5
+f_E: 0.2
+example: {ensemble: 2, window: 2}   # neurons 200-299 in window T3, shown in panel C
+current: 3.0
+noise: {fraction: 0.5, gain: 15.0}  # [VERIFY] legend: gain 15; Methods text: 0.1 (Fig. 4D) -- legend used
+example_neuron: 250
+seed: 7
+common_noise: true          # [VERIFY] perturbed and unperturbed runs share the noise realisation

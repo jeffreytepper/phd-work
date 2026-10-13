@@ -1,0 +1,26 @@
+# Braun et al. (2026) Fig. 5 and Supp. Fig. 10 (WP0.6): an upstream sequence scaffolds downstream sequences.
+# Upstream: trained network a = 0.5, sigma = 1 s, b = 0.3, run 8.5 s.  Downstream: 10 unconnected linear units,
+# A initialised to ones, 1000 iterations, alpha = 0.015 (Methods lines 1223-1295).
+settings: dev
+upstream: {amp: 0.5, width: 1.0, offset: 0.3}
+upstream_perturb: {amp: 0.6, width: 1.0, offset: 0.3}   # Supp. 10D/E legend ("upstream amplitude 0.6")
+realisation: 0
+N_d: 10
+alpha: 0.015
+n_iter: 1000
+t_max: 8.4                      # error and correlation over 0 <= t <= 8.4 s at dt = 0.0081 s
+target_dt: 0.0081               # [VERIFY] A7: Methods print bin size 0.0001 s; the upstream input uses 0.0081 s
+seed: 21
+panels:
+  B: {amp: 0.5, width: 1.0, offset: 0.3}
+  C: {amp: 0.5, width: 2.0, offset: 0.3}          # paper corr 0.99
+  D: {amp: 0.5, width: 0.5, offset: 0.3}          # paper corr 0.87 ([VERIFY] A8: legend title says 2 s)
+width_sweep: [0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0, 2.2]
+amp_sweep: [0.1, 0.3, 0.5, 0.85, 1.7, 3.4, 5.1, 7.65]   # [VERIFY] A10: Methods give no range; figure axis 0.85-7.65
+offset_sweep: [0.0, 0.05, 0.3, 0.85, 1.7, 3.4]          # figure axis 0-3.4
+supp10:
+  B: {amp: 0.3, width: 1.0, offset: 0.3}   # [VERIFY] A9: legend sigma = 1 s; Methods sigma = 0.4 s (legend followed)
+  C: {amp: 0.5, width: 1.0, offset: 0.05}
+  DE: {amp: 0.5, width: 1.0, offset: 0.3}
+perturb: {fraction: 0.2, window_s: [2.0, 3.7], current: 3.0, first_neuron: 150}
+paper: {C: 0.99, D: 0.87, wide_min: 0.99, narrow_04: 0.8}

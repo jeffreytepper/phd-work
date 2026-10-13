@@ -1,0 +1,16 @@
+# Braun et al. (2026) Fig. 2 and Supp. Figs. 3-5 (WP0.2, WP0.3): the profile tracks the target parameters.
+# Sweeps from spec Section 7 (WP0.2 table); trained at dev settings first (spec D9: 10 realizations, 100 + 10 iterations).
+settings: dev
+offset_sweep: {amp: 0.5, width: 1.0, values: [0.0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45]}
+width_sweep: {amp: 0.5, offset: 0.0, values: [0.5, 0.9, 1.0, 1.15, 1.3, 1.45, 1.6, 1.75, 1.9]}
+amp_sweep: {width: 1.0, offset: 0.0, values: [0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]}
+amp_width_grid: {offset: 0.0, amps: [0.4, 0.6, 0.8, 1.0], widths: [0.5, 0.9, 1.3, 1.7]}
+offset_amp_grid: {width: 1.0, offsets: [0.0, 0.1, 0.2, 0.3], amps: [0.4, 0.5, 0.6, 0.7]}
+fig2_panels:               # the three profiles shown per row of Fig. 2
+  offset: [0.25, 0.35, 0.45]
+  width: [0.5, 0.9, 1.3]
+  amplitude: [0.6, 0.8, 1.0]
+features: {window: 50, sigma_frac: 0.2, prominence: 0.001}   # [VERIFY] A5: MATLAB smoothdata gaussian std = window/5
+paper_trends:              # spec WP0.2 expected trends / Supp. Fig. 3 values (read off the figure)
+  asymmetry_low_offset: [10, 20]      # neurons, up to b = 0.25
+  asymmetry_at_045: 75
