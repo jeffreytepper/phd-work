@@ -1,0 +1,23 @@
+[
+ {
+  "item": "no single kernel best for all classes",
+  "criterion": "#distinct best kernels > 1",
+  "value": 4,
+  "passed": true
+ },
+ {
+  "item": "best kernel per class matches figure stars (lambda calibrated, see panel F)",
+  "criterion": "5/5 classes",
+  "value": "5/5: Gaussian PSD: Gaussian sigma=0.29, Polynomial: Gaussian sigma=0.29, Chaotic harmonic: Point sigma=0.025, Piecewise: Box R=1.2, Narrowband: Gabor xi0=8",
+  "passed": true
+ },
+ {
+  "item": "error range comparable to figure colorbar",
+  "criterion": "log10 rel. MSE within [-2.5, 0.1]",
+  "value": [
+   -1.8513402882778434,
+   -3.466069303098678e-05
+  ],
+  "passed": true
+ }
+]

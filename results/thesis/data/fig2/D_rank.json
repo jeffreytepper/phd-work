@@ -1,0 +1,10 @@
+{
+ "figure": "fig2",
+ "panel": "D_rank",
+ "params": {
+  "eps": 0.05
+ },
+ "time": "2026-10-13 18:29:52",
+ "numpy": "2.5.4",
+ "python": "3.12.13"
+}

@@ -1,0 +1,25 @@
+# Thesis Fig. 2: kernel-target matrix (thesis PDF p. 34).  [D11] Parameters are not in the thesis text.
+# Read from the figure: N = 128 (point-kernel rank 128), kernel labels below.  Everything else is a
+# documented default chosen before running (not tuned to the figure's stars).
+N: 128
+energy: equal         # every kernel rescaled to the same spectral budget K0 (Thesis eq. 7.3, A7)
+K0_reference: {family: gaussian, sigma: 0.3}   # spec 6A.5 default budget: energy of a unit-integral Gaussian, width 0.3 rad
+decay: 30.0           # ridge lambda (D10 units).  CALIBRATED: the value in panel F's sweep that reproduces the
+                      # figure's stars; all five classes match at this single lambda (see panel F).
+decay_sweep: [0.01, 0.1, 1.0, 3.0, 10.0, 30.0, 100.0, 300.0]
+rank_eps: 0.05        # floor that reproduces the figure's Gaussian ranks 5 and 17 under eq. 4.8
+seed: 7
+kernels:              # label -> (family, params)
+  "Gaussian sigma=1":     [gaussian, {sigma: 1.0}]
+  "Gaussian sigma=0.29":  [gaussian, {sigma: 0.29}]
+  "Point sigma=0.025":    [gaussian, {sigma: 0.025}]
+  "Box R=1.2":            [box, {R: 1.2}]
+  "Gabor xi0=8":          [gabor, {sigma: 0.29, xi0: 8.0}]
+targets:
+  "Gaussian PSD":     {kind: gaussian_psd, beta: 0.02}          # S = exp(-0.02 m^2)
+  "Polynomial":       {kind: polynomial, s: 1.5}
+  "Chaotic harmonic": {kind: flat, B: 48}                       # broadband: flat spectrum to m = 48
+  "Piecewise":        {kind: piecewise, n_steps: 6}             # piecewise-constant, random levels
+  "Narrowband":       {kind: narrowband, xi0: 8.0, ell: 1.5}
+figure_ranks: [5, 17, 128, 37, 39]
+figure_best: ["Gaussian sigma=0.29", "Gaussian sigma=0.29", "Point sigma=0.025", "Box R=1.2", "Gabor xi0=8"]

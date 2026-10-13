@@ -1,0 +1,20 @@
+# Thesis Fig. 3: five kernel families (thesis PDF p. 45).  [D11] Parameters not in the text.
+# From the figure: N = 128 (point rank 128), 5000 epochs, modes m = 1, 2, 6, 9 tracked, spectral floor 0.05,
+# cutoff indices r_k = 128, 7, 23, 34, 24 (the panel labels are the largest mode above the floor, not eq. 4.8).
+# Family widths below are chosen so the cutoffs are close to those labels.
+N: 128
+decay: 1.0          # ridge lambda (D10 units); delta rule uses lambda / T (see readout.py)
+eta: 0.001          # delta-rule rate, fixed across families
+epochs: 5000
+modes: [1, 2, 6, 9]
+snapshots: [0, 50, 200, 1000, 5000]
+floor: 0.05
+seed: 3
+families:
+  Point: [point, {}]
+  Gaussian: [gaussian, {sigma: 0.32}]
+  Gabor: [gabor, {sigma: 0.2, xi0: 10.0}]
+  Box B0: [box, {R: 1.2}]         # same box as Fig. 2; sidelobe envelope 2/(mR) crosses 0.05 near m = 34
+  B-spline B3: [bspline, {p: 3, h: 0.17}]
+figure_cutoffs: [128, 7, 23, 34, 24]
+target: {kind: even_harmonics, n_harmonics: 12, decay: 0.15}   # period-pi target (only even modes), as in the figure

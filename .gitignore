@@ -9,6 +9,5 @@ __pycache__/
 # extracted text of copyrighted source PDFs (regenerate locally)
 sources/
 
-# large run outputs (figures and REPORT.md are tracked; bulky arrays are not)
-results/**/data/*.npz
+# bulky run outputs (figure data under results/thesis/data is small and tracked)
 results/**/runs/
