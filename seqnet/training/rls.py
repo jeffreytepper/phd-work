@@ -55,7 +55,7 @@ class ForceConfig:
     state_reset: bool = True
     target_time: Literal["analytic", "bin"] = "analytic"
     weight_decay: float = 0.0
-    mask: dict | None = None  # {"kind": "presyn_random"|"presyn_block", "fraction": f}
+    mask: dict | None = None  # {"kind": "presyn_random"|"presyn_block"|"synapse_random", "fraction": f}
     data: dict | None = None  # experimental target, see seqnet.data.registry (overrides N and the synthetic target)
     seed: int = 0
 
@@ -91,8 +91,11 @@ def _mask_columns(cfg: ForceConfig, rng: np.random.Generator, N: int) -> np.ndar
         zero = rng.choice(N, n_zero, replace=False)
     elif kind == "presyn_block":
         zero = np.arange(N - n_zero, N)  # the last fraction of neurons in the sequence ordering (Supp. 2E)
+    elif kind == "synapse_random":
+        M = rng.random((N, N)) >= frac  # True = synapse kept and trained (Braun lines 1053-1073)
+        return M
     else:
-        raise NotImplementedError(f"mask kind {kind!r} (per-synapse masks with per-row P_i) not implemented yet")
+        raise ValueError(f"unknown mask kind {kind!r}")
     keep = np.ones(N, bool)
     keep[zero] = False
     return keep
@@ -136,11 +139,27 @@ def train_realization(cfg: ForceConfig, realization: int, keep_W0: bool = False)
         target = spec.h_target(tz) if cfg.error_target == "methods" else spec.y_target(tz, cfg.tau)
         h_init = spec.h_target(np.array([t0]))[:, 0]
     keep = _mask_columns(cfg, rng, N)
-    if keep is not None:
+    rowmask = None
+    if keep is not None and keep.ndim == 2:
+        # per-synapse mask with one P_i per postsynaptic row (Braun eq. 18-19); rows padded to a common length with a
+        # sentinel presynaptic index N whose rate is 0, which leaves the padded P entries untouched (exact).
+        rowmask, keep = keep, None
+        J[~rowmask] = 0.0
+        L = int(rowmask.sum(1).max())
+        mem = N * L * L * 8
+        if mem > float(cfg.mask.get("max_bytes", 6e8)):
+            raise MemoryError(f"per-row P_i needs {mem / 1e9:.1f} GB at fraction {cfg.mask['fraction']}; raise mask.max_bytes")
+        idx = np.full((N, L), N)
+        for i in range(N):
+            nz = np.nonzero(rowmask[i])[0]
+            idx[i, : nz.size] = nz
+        P_rows = np.broadcast_to(cfg.p0 * np.eye(L), (N, L, L)).copy()
+        J_ext = np.concatenate([J, np.zeros((N, 1))], axis=1)
+    elif keep is not None:
         J[:, ~keep] = 0.0
     J0 = J.copy() if keep_W0 else None
     nL = N if keep is None else int(keep.sum())
-    P = cfg.p0 * np.eye(nL)
+    P = cfg.p0 * np.eye(nL) if rowmask is None else None
     ns = noise_scale(prm)
     a = cfg.dt / cfg.tau
     n_it = cfg.n_train + cfg.n_test
@@ -160,7 +179,20 @@ def train_realization(cfg: ForceConfig, realization: int, keep_W0: bool = False)
             z += ns * rng.standard_normal(N)
             if k % m == 0:
                 R_rec[:, u] = r
-                if train:
+                if train and rowmask is not None:
+                    e = z - target[:, u]
+                    rp = np.append(r, 0.0)[idx]  # (N, L) presynaptic rates per row
+                    Pr = np.einsum("nij,nj->ni", P_rows, rp)
+                    denom = 1.0 + np.einsum("ni,ni->n", rp, Pr)
+                    P_rows -= np.einsum("ni,nj->nij", Pr, Pr) / denom[:, None, None]
+                    Prn = Pr / denom[:, None]
+                    c = 1.0 / (1.0 + np.einsum("ni,ni->n", rp, Prn)) if cfg.c_uses_updated_P else 1.0
+                    J_ext[np.arange(N)[:, None], idx] -= (c * e)[:, None] * Prn
+                    J_ext[:, N] = 0.0
+                    J = J_ext[:, :N]
+                    if cfg.weight_decay:
+                        J_ext *= 1.0 - cfg.weight_decay
+                elif train:
                     e = z - target[:, u]
                     rL = r if keep is None else r[keep]
                     Pr = P @ rL
@@ -184,6 +216,8 @@ def train_realization(cfg: ForceConfig, realization: int, keep_W0: bool = False)
     }
     if keep is not None:
         out["keep"] = keep
+    if rowmask is not None:
+        out["keep"] = rowmask
     if J0 is not None:
         out["J0"] = J0
     return out

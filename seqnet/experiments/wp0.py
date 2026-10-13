@@ -18,6 +18,8 @@ __all__ = ["SETTINGS", "condition", "GROUPS", "run_group", "get"]
 SETTINGS = {
     "final": {"n_realizations": 50, "n_train": 300, "n_test": 10},
     "dev": {"n_realizations": 10, "n_train": 100, "n_test": 10},
+    # reduced settings for the expensive per-synapse masks (Supp. 2, mask c; one P_i per row)
+    "quick": {"n_realizations": 5, "n_train": 60, "n_test": 10},
 }
 
 
@@ -53,7 +55,13 @@ def label_of(amp, width, offset) -> str:
 def get(amp: float, width: float, offset: float, settings: str = "dev", store_full=5, **overrides) -> RunResult:
     """Train or load one condition."""
     cfg, R = condition(amp, width, offset, settings, **overrides)
-    lab = label_of(amp, width, offset) + ("" if not overrides else "_" + "_".join(f"{k}{v}" for k, v in sorted(overrides.items())))
+
+    def _fmt(k, v):
+        if isinstance(v, dict):
+            return "_".join(f"{v[x]}" for x in sorted(v) if x != "max_bytes")
+        return f"{k}{v}"
+
+    lab = label_of(amp, width, offset) + ("" if not overrides else "_" + "_".join(_fmt(k, v) for k, v in sorted(overrides.items())))
     return run_condition(cfg, R, label=f"{settings}-{lab}", store_full=store_full, settings=settings)
 
 
@@ -123,6 +131,21 @@ def get_matched(name: str, which: str = "ours", settings: str = "final", store_f
                settings=settings)
 
 
+SPARSITY = {
+    "presyn_random": ("dev", [0.0, 0.25, 0.5, 0.75, 0.9, 0.95]),
+    "presyn_block": ("dev", [0.1, 0.2, 0.25, 0.3, 0.35, 0.4, 0.5]),
+    "synapse_random": ("quick", [0.75, 0.85, 0.95]),
+}
+
+
+def get_sparse(kind: str, fraction: float, settings: str | None = None) -> RunResult:
+    """Supp. 2 condition: a = 0.5, sigma = 1.7 s, b = 0 with a sparsity mask (Braun lines 1031-1074)."""
+    st = settings or SPARSITY[kind][0]
+    if fraction == 0.0:
+        return get(0.5, 1.7, 0.0, st)
+    return get(0.5, 1.7, 0.0, st, mask={"kind": kind, "fraction": fraction, "max_bytes": 6e8})
+
+
 def run_group(group: str, settings: str, store_full=5) -> list[RunResult]:
     out = []
     for amp, width, offset in GROUPS[group]:
@@ -137,13 +160,19 @@ def run_group(group: str, settings: str, store_full=5) -> list[RunResult]:
 
 def main(argv=None):
     ap = argparse.ArgumentParser()
-    ap.add_argument("groups", nargs="+", choices=list(GROUPS) + ["all", "bat"])
+    ap.add_argument("groups", nargs="+", choices=list(GROUPS) + ["all", "bat", "sparsity"])
     ap.add_argument("--settings", default="dev", choices=list(SETTINGS))
     ap.add_argument("--store-full", default="5")
     a = ap.parse_args(argv)
     sf = a.store_full if a.store_full == "all" else int(a.store_full)
     groups = list(GROUPS) if a.groups == ["all"] else a.groups
     for g in groups:
+        if g == "sparsity":
+            for kind, (st, fr) in SPARSITY.items():
+                for f in fr:
+                    r = get_sparse(kind, f)
+                    print("sparsity", kind, f, st, r.path.name, "test corr", round(float(r.summary["corr"][:, -1].mean()), 3), flush=True)
+            continue
         if g == "bat":
             r = get_data("bat", a.settings, store_full=sf)
             print("bat", r.path.name, "test corr", r.summary["corr"][:, -1].mean(), flush=True)

@@ -29,7 +29,7 @@ Data notebooks: `braun_supp6` (bump fits), `braun_fig3` (Fig. 3 and Supp. 7), `b
 
 **Not done:**
 - MEC panels: Fig. 3E/F, Supp. 6A–C, Supp. 7 circles, Fig. 4H and Supp. 9I–K are blocked on [DATA].
-- Supp. 2 (sparsity, WP0.4): mask type (c), per-row P_i, is not implemented yet.
+- Supp. 2 (sparsity, WP0.4): all three mask types are implemented. Mask (c), one P_i per row, runs at reduced settings for fractions 0.75–0.95 only, because memory is N·L² per network.
 - WP0.9 ablations.
 
 ## Settings
@@ -94,5 +94,20 @@ Data notebooks: `braun_supp6` (bump fits), `braun_fig3` (Fig. 3 and Supp. 7), `b
 **Interpretation of the bat motif result.** The data-trained mean matrix shows vertical stripes: presynaptic neurons project with consistent sign. Under Braun eq. 15 this registers as τ_con. Braun report banding only in data-trained networks (mouse τ_div ≈ 0.72); here it appears weakly in τ_con for the bat. τ_rec is 0.04 in the data network versus 0.63 in the synthetic control, matching Supp. 7's "mismatch between data and synthetic motifs". This feeds WP5.1 (banding from heterogeneity).
 
 **Finding 5 (bump-fit procedure).** Braun take the offset as the minimum of the bump (Methods line 1114). For a bump that hasn't decayed to baseline within the 8.5-s window, this biases the fit: a true σ = 1.72 s returns σ̂ = 1.63 and b̂ = 0.086 (test `test_fit_bump_bias_of_minimum_offset`). The synthetic matched control built from fitted parameters is therefore not exactly the bump that was fitted.
+
+**Finding 7 (reset location, Supp. 8 / WP0.5).** Braun write that a silenced sequence resets "as far away from the silenced ensemble as the position of the minimum in the connectivity profile".
+- Across the seven Supp. 8 networks (all ensembles silenced in their active window), the profile's global minimum predicts the reset distance with a median error of 116 neurons, and the nearest local minimum with 78.
+- The **zero crossing** of the smoothed profile on the reset side, where excitation turns into inhibition, predicts it with a median error of **13 neurons**.
+- In the Fig. 4 network, resets land 70–104 neurons back. The profile minimum is at −230; the zero crossing is at ≈ −110.
+- This sharpens Result 4 and is input for WP4.2.
+
+**Finding 8 (downstream, Fig. 5 / WP0.6).**
+- With the upstream network run with noise (Methods), the 1000-iteration readout rule plateaus at correlation 0.93 for wide targets (paper ≥ 0.99). Least squares reaches 1.000, and 20 000 iterations reach 0.99, so the target is representable; the rule just converges slowly on noisy input.
+- With a noise-free upstream run, wide targets reach 0.994–0.999, matching the paper. The noise-free run is recorded as a [VERIFY] alternative.
+- σ_d = 0.4 s gives 0.87 (paper ≈ 0.8). Correlation is flat in offset, and ≥ 0.97 over the figure's amplitude range.
+- T18 holds: ‖A‖₂ = 4.6, far above the scaffolding bound (0.07–0.12).
+
+**Finding 9 (noise perturbation scale).** Methods eq. 22 defines η = gain × ζ, where ζ already contains the base gain 0.5. Spec 6.3 drops that factor, so it is twice as strong as the source. The code follows the source.
+- Even so, gains 5–20 into 10–75% of neurons lower the post-release correlation more than the legend's "sequences always continue" suggests. Visually the sequences do continue: the low correlations come from phase shifts after release, not from loss of the sequence.
 
 **Finding 6 (engineering).** Adding a field to `ForceConfig` silently changed every cache hash, and a notebook started retraining Fig. 1. The hash now ignores late fields left at their defaults, and legacy hashes are still accepted.

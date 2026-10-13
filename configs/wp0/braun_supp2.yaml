@@ -1,0 +1,12 @@
+# Braun et al. (2026) Supp. Fig. 2 (WP0.4): profiles are preserved under sparse connectivity.
+# Target a = 0.5, sigma = 1.7 s, b = 0.  Fractions and settings: seqnet.experiments.wp0.SPARSITY
+# (mask a/b at dev settings; mask c, one P_i per row, at reduced 'quick' settings: 5 realisations x 60 + 10 iterations).
+reference: final            # dense reference profile: the Fig. 1 run (final settings)
+examples: {C: [presyn_random, 0.0], D: [presyn_random, 0.25], E: [presyn_block, 0.25], F: [synapse_random, 0.85]}
+paper:
+  D_profile_corr: [0.930, 0.004]
+  E_profile_corr: [0.910, 0.005]
+  F_profile_corr: [0.940, 0.003]
+  presyn_random_ok_up_to: 0.95
+  presyn_block_fails_beyond: 0.35
+  synapse_random_ok_up_to: 0.95
