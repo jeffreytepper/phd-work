@@ -219,6 +219,7 @@ class History:
     bias: list = field(default_factory=list)
     alias: list = field(default_factory=list)
     network: list = field(default_factory=list)
+    inner_dist: list = field(default_factory=list)  # per inner sweep |w - w*|/|w*| (when record_inner=True)
 
     def as_arrays(self) -> dict:
         return {k: np.asarray(v) for k, v in self.__dict__.items()}
@@ -257,6 +258,7 @@ class LearningSystem:
     sign_policy: str = "positive"
     seed: int = 0
     warn_tol: float = 1e-2
+    record_inner: bool = False
 
     def __post_init__(self) -> None:
         self.T_obs = self.N if self.T_obs is None else self.T_obs
@@ -285,11 +287,17 @@ class LearningSystem:
                 self.w = w_star
             else:
                 dr = DeltaRule(self.N, self.eta_w, self.decay, self.T_obs, w=self.w.copy())
+                nrm = max(np.linalg.norm(w_star), 1e-300)
+                inner = [float(np.linalg.norm(dr.w - w_star) / nrm)]
                 for _e in range(self.inner_epochs):
                     if self.readout == "batch":
                         dr.batch_epoch(X, y)
                     else:
                         dr.epoch(X, y, order=self.rng.permutation(self.T_obs))
+                    if self.record_inner:
+                        inner.append(float(np.linalg.norm(dr.w - w_star) / nrm))
+                if self.record_inner:
+                    h.inner_dist.append(inner)
                 self.w = dr.w
             dist = float(np.linalg.norm(self.w - w_star) / max(np.linalg.norm(w_star), 1e-300))
             if dist > self.warn_tol:

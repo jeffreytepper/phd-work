@@ -1,0 +1,95 @@
+[
+ {
+  "item": "allocation within 5% of eq. 7.13 on active modes",
+  "criterion": "max relative error < 0.05",
+  "value": 2.7466809413372068e-14,
+  "passed": true
+ },
+ {
+  "item": "active set exact",
+  "criterion": "identical masks",
+  "value": {
+   "learned": [
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18
+   ],
+   "wiener": [
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18
+   ]
+  },
+  "passed": true
+ },
+ {
+  "item": "readout at ridge equilibrium within each kernel step",
+  "criterion": "readout distance < 1e-2 after the inner loop, from epoch 10 on",
+  "value": 0.025028701595882753,
+  "passed": false
+ },
+ {
+  "item": "epochs violating readout equilibrium (diagnostic)",
+  "criterion": "reported only",
+  "value": {
+   "n_epochs": 17,
+   "fraction": 0.005666666666666667,
+   "epochs": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    19,
+    20
+   ],
+   "active_set_changes_at": [
+    1,
+    2,
+    3,
+    6,
+    20,
+    65,
+    326,
+    706
+   ]
+  },
+  "passed": null
+ }
+]

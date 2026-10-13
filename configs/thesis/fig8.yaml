@@ -1,0 +1,20 @@
+# Thesis Fig. 8: online learning of the Wiener-optimal kernel (thesis PDF p. 103).  [D11]
+# Inferred from the figure: lambda = 0.1 and K0 = 10 in the thesis's unitary units (the Fig. 9 defaults; the
+# figure's Wiener bars sum to ~10 over signed modes), 20 weight sweeps per kernel epoch, ~3000 kernel epochs,
+# initial broad Gaussian (a_0 ~ 2.4).  A narrowband target with xi0 = 10.5, l = 2.5 reproduces the figure's Wiener
+# spectrum (active from m = 3, peak ~0.55 at m = 10-11).  N = 64 (bump raster resolution).
+# D10 units: lambda_op = N * lambda, K0_op = N * K0 (the error formula is invariant under this joint rescaling).
+N: 64
+decay_unitary: 0.1
+K0_unitary: 10.0
+target: {kind: narrowband, xi0: 10.5, ell: 2.5}
+initial_kernel: {family: gaussian, sigma: 0.6}
+rule: thesis               # eq. 9.10 as written (precondition 'none')
+budget: project            # spec 6.9 offers dual/fixed; projection keeps sum a = K0 exactly every step
+eta_k_factor: 10.0         # eta_k = factor * lambda^2 / (3 S_max)   (lambda^2/(3 S_max) is the a = 0 stability bound)
+readout: batch             # mean-field delta-rule sweeps (eq. 3.18 in expectation)
+inner_epochs: 20
+eta_w_factor: 0.5          # eta_w = factor / (max a / T + lambda / T)
+kernel_epochs: 3000
+snapshots: [0, 100, 300, 1000, 2999]
+seed: 8
