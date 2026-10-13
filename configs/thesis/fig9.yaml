@@ -1,0 +1,26 @@
+# Thesis Fig. 9: parameter sweeps of the online kernel-learning system (thesis PDF p. 114).  [D11]
+# From the figure: defaults N = 128, lambda = 0.1, K0 = 10 (thesis unitary units); sweeps N in {24..256},
+# K0 in {1..40}, lambda in {0.003..1}; 2000 kernel epochs; printed T* grid (bottom right).
+# Target: a narrowband class xi0 = 24, l = 3 reproduces ALL 36 printed T* values exactly via T* = 2M* (eq. 9.27) of
+# the water-filling optimum at T_obs = N, with lambda_op = N lambda and K0_op = N K0 (D10 units).
+target: {kind: narrowband, xi0: 24.0, ell: 3.0}
+M_max: 128                 # target spectrum support (content beyond N/2 enters the network floor)
+defaults: {N: 128, decay: 0.1, K0: 10.0}
+sweep_N: [24, 32, 40, 48, 64, 96, 128, 192, 256]
+sweep_K0: [1, 2, 5, 10, 20, 40]
+sweep_decay: [0.003, 0.01, 0.03, 0.1, 0.3, 1.0]
+kernel_epochs: 2000
+initial_kernel: {family: gaussian, sigma: 0.6}
+rule: thesis               # eq. 9.10 as written
+budget: project
+eta_k_factor: 1.9          # eta_k = factor * lambda^2 / (3 S_max): just inside the a = 0 stability bound (factor 2).
+                           # Fig. 8 used 10, which limit-cycles here at lambda = 1 (all modes stay near a ~ lambda).
+readout: exact             # inner loop at ridge equilibrium each kernel epoch (Fig. 8 covers the fast loop)
+figure_T_grid:             # K0 -> T* for lambda = 0.003, 0.01, 0.03, 0.1, 0.3, 1
+  40: [84, 80, 76, 72, 68, 62]
+  20: [82, 78, 74, 70, 64, 60]
+  10: [80, 76, 72, 66, 62, 58]
+  5: [78, 72, 68, 64, 60, 56]
+  2: [74, 70, 64, 60, 56, 54]
+  1: [72, 66, 62, 58, 54, 52]
+seed: 9

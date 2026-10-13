@@ -27,6 +27,10 @@ __all__ = [
     "optimality_gap",
     "implied_psd",
     "appendix_I_cases",
+    "noisy_alloc",
+    "water_fill_noisy",
+    "snr",
+    "noise_floor_estimate",
 ]
 
 Law = Literal["cube", "sqrt"]
@@ -366,3 +370,91 @@ def appendix_I_cases(N: int = 128, decay: float = 1e-2, K0: float = 100.0) -> li
     for c in cases:
         c.update({"decay": decay, "K0": K0, "N": N})
     return cases
+
+
+def snr(S: np.ndarray, noise_var: float, T_obs: int) -> np.ndarray:
+    """Per-mode signal-to-noise ratio SNR(m) = S(m) / (sigma_eta^2 / T) (Thesis eq. G.8)."""
+    return np.asarray(S, dtype=float) / (noise_var / T_obs)
+
+
+def noise_floor_estimate(err_power: np.ndarray, a: np.ndarray, tol: float = 0.0) -> float:
+    """sigma_eta^2 / T estimated as the mean residual power over inactive modes I = {m : a_m = 0} (Thesis eq. G.9)."""
+    err_power = np.asarray(err_power, dtype=float)
+    inactive = np.asarray(a) <= tol
+    if not inactive.any():
+        return float("nan")
+    return float(err_power[: inactive.size][inactive].mean())
+
+
+def noisy_alloc(S: np.ndarray, nu: float, decay: float, phi: float) -> np.ndarray:
+    """Per-mode root of the noisy optimality condition 2 lambda (lambda S - a phi) / (a + lambda)^3 = nu (eq. G.14).
+
+    phi = sigma_eta^2 / T.  The left side is strictly decreasing in a >= 0, so there is a unique root when
+    S > nu lambda / 2 (equivalently, the cubic G.16 has one positive root) and a = 0 otherwise.  Solved by bisection.
+    """
+    S = np.asarray(S, dtype=float)
+    lam = decay
+    out = np.zeros_like(S)
+    for i, s in enumerate(S):
+        if s <= nu * lam / 2:
+            continue
+        g = lambda x: 2 * lam * (lam * s - x * phi) / (x + lam) ** 3 - nu  # noqa: E731
+        hi = max((2 * lam**2 * s / nu) ** (1 / 3), lam)  # noiseless root + lambda bounds the noisy root
+        lo = 0.0
+        for _ in range(200):
+            mid = 0.5 * (lo + hi)
+            if g(mid) > 0:
+                lo = mid
+            else:
+                hi = mid
+        out[i] = 0.5 * (lo + hi)
+    return out
+
+
+def water_fill_noisy(
+    S: np.ndarray, decay: float, K0: float, noise_var: float, T_obs: int | None = None, N: int | None = None,
+) -> WaterFillResult:
+    """Wiener-optimal allocation under observation noise (Thesis App. G.7, eq. G.10-G.16).
+
+    Minimizes sum_m (lambda^2 S + a^2 phi)/(a + lambda)^2 with phi = sigma_eta^2/T subject to sum a <= K0, solving the
+    per-mode condition (G.14) for each trial nu and bisecting nu (log space) on the budget.
+
+    Budget as an upper bound (a correction to App. G.7, see REPORT): each mode's noisy error has a finite minimum at
+    a = lambda S / phi.  If sum_m lambda S(m)/phi <= K0, spending the whole budget would *raise* the error (the
+    equality-constrained problem is then non-convex and needs nu < 0), so the optimum is a = lambda S / phi with nu = 0
+    and the budget is slack (reported as a negative ``budget_residual``).
+    """
+    S = np.asarray(S, dtype=float)
+    if N is None:
+        N = T_obs if T_obs is not None else 2 * (S.size - 1)
+    T_obs = N if T_obs is None else T_obs
+    n_half = N // 2 + 1
+    S_h = np.concatenate([S, np.zeros(max(0, n_half - S.size))])[:n_half]
+    m = np.arange(n_half)
+    mult = mode_multiplicity(N)
+    S_e = np.where(m <= T_obs / 2, S_h, 0.0)
+    phi = noise_var / T_obs
+    if phi > 0:
+        a_free = decay * S_e / phi  # nu = 0 optimum of each mode
+        if float(np.sum(mult * a_free)) <= K0:
+            active = a_free > 0
+            return WaterFillResult(a=a_free, nu=0.0, active=active, M_star=int(m[active].max()) if active.any() else -1,
+                                   N=N, T_obs=T_obs, K0=K0, decay=decay, law="cube_noisy",
+                                   budget_residual=float(np.sum(mult * a_free) - K0))
+    budget = lambda nu: float(np.sum(mult * noisy_alloc(S_e, nu, decay, phi)))  # noqa: E731
+    hi = 2 * S_e.max() / decay
+    lo = hi
+    while budget(lo) < K0:
+        lo /= 10.0
+    llo, lhi = np.log(lo), np.log(hi)
+    for _ in range(200):
+        mid = 0.5 * (llo + lhi)
+        if budget(np.exp(mid)) > K0:
+            llo = mid
+        else:
+            lhi = mid
+    nu = float(np.exp(0.5 * (llo + lhi)))
+    a = noisy_alloc(S_e, nu, decay, phi)
+    active = a > 0
+    return WaterFillResult(a=a, nu=nu, active=active, M_star=int(m[active].max()) if active.any() else -1, N=N,
+                           T_obs=T_obs, K0=K0, decay=decay, law="cube_noisy", budget_residual=float(np.sum(mult * a) - K0))

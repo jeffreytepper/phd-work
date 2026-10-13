@@ -1,0 +1,60 @@
+[
+ {
+  "item": "error falls with N",
+  "criterion": "fixed-point error non-increasing in N",
+  "value": [
+   0.9999858386885545,
+   0.9978006380837084,
+   0.9346604904418867,
+   0.5736631565075453,
+   0.05324781217801283,
+   0.05157689548329245,
+   0.05157689548329244,
+   0.05157689548329244,
+   0.05157689548329245
+  ],
+  "passed": true
+ },
+ {
+  "item": "error falls with K0",
+  "criterion": "non-increasing in K0",
+  "value": [
+   0.4778781490945797,
+   0.3030936218206278,
+   0.12530800904581138,
+   0.05157689548329244,
+   0.018027827221750774,
+   0.005558721085847776
+  ],
+  "passed": true
+ },
+ {
+  "item": "error rises with lambda",
+  "criterion": "non-decreasing in lambda",
+  "value": [
+   0.00010129778731282776,
+   0.0010349378818946293,
+   0.007649575011248867,
+   0.05157689548329244,
+   0.19305995480850235,
+   0.4778781490945797
+  ],
+  "passed": true
+ },
+ {
+  "item": "T* grid matches the 36 printed values",
+  "criterion": "exact",
+  "value": 0,
+  "passed": true
+ },
+ {
+  "item": "learning curves reach the fixed point after 2000 epochs (diagnostic)",
+  "criterion": "reported: max relative gap per sweep",
+  "value": {
+   "N": 0.06343485176061636,
+   "K0": 6.020354752370821,
+   "lambda": 335.85988290985193
+  },
+  "passed": null
+ }
+]

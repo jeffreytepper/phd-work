@@ -54,10 +54,14 @@ from .optimum import (
     joint_optimum,
     marginal_returns,
     min_bias_error,
+    noise_floor_estimate,
+    noisy_alloc,
     optimality_gap,
     ridge_fill,
     ridge_marginal_returns,
+    snr,
     water_fill,
+    water_fill_noisy,
 )
 from .perturbation import (
     amplitude_modulated,
@@ -104,6 +108,7 @@ __all__ = [
     # optimum
     "WaterFillResult", "water_fill", "ridge_fill", "min_bias_error", "JointResult", "joint_optimum",
     "marginal_returns", "ridge_marginal_returns", "optimality_gap", "implied_psd", "appendix_I_cases",
+    "water_fill_noisy", "noisy_alloc", "snr", "noise_floor_estimate",
     # learning
     "ThesisKernelRule", "RidgeObjectiveRule", "spatial_error_power", "temporal_error_power", "EMAEstimator",
     "History", "LearningSystem", "observable_gradient", "analytic_gradient",
