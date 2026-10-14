@@ -9,7 +9,7 @@ __pycache__/
 # extracted text of copyrighted source PDFs (regenerate locally)
 sources/
 
-# bulky run outputs (figure data under results/thesis/data is small and tracked)
+# bulky run outputs
 results/**/runs/
 
 # external datasets (downloaded locally, not redistributed)

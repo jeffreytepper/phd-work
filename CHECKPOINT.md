@@ -1,5 +1,8 @@
 # Checkpoint 1 — 2026-10-14
 
+> **2026-10-15:** the WP-T thesis framework (`seqnet.thesis`, `configs/thesis/`, `tests/thesis/`, `results/thesis/`)
+> has moved to its own repository, **msc-thesis** (package `msc_thesis`). Paths below refer to the old layout.
+
 A review of what exists, what works, what should change, and how to proceed. Details and numbers are in
 `results/thesis/REPORT.md` (WP-T) and `results/wp0/REPORT.md` (WP0). The spec is
 `Design spec from readout function to sequence connectivity.md`.

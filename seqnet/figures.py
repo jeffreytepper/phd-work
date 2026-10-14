@@ -1,6 +1,6 @@
 """Notebook helpers for the main-package reproductions (Braun et al.; WP0 onward).
 
-Same pattern as :mod:`seqnet.thesis.figures`: one notebook per figure (``notebooks/<wp>/<fig>.ipynb``), panel by panel;
+Same pattern as ``msc_thesis.figures`` (the standalone thesis package): one notebook per figure (``notebooks/<wp>/<fig>.ipynb``), panel by panel;
 compute cells write ``results/<wp>/data/<fig>/<panel>.npz`` (+ JSON parameters), plot cells read only those files and
 write ``results/<wp>/figures/<fig>/<panel>.png``; configs live in ``configs/<wp>/<fig>.yaml``; each notebook ends with
 ``results/<wp>/data/<fig>/acceptance.json``.

@@ -1,1 +1,0 @@
-{"N": 64, "decay": 0.1, "K0": 10, "units": "unitary", "target": {"kind": "narrowband", "xi0": 10.5, "ell": 2.5}, "kernel_epochs": 1500, "out": "results/thesis/runs/example_learn.npz"}

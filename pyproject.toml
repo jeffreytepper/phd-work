@@ -1,7 +1,7 @@
 [project]
 name = "seqnet"
 version = "0.1.0"
-description = "From readout function to sequence connectivity: thesis framework (seqnet.thesis) + Braun et al. (2026) reproduction"
+description = "From readout function to sequence connectivity: Braun et al. (2026) reproduction and sequence networks (thesis framework lives in msc-thesis)"
 requires-python = ">=3.11"
 dependencies = [
     "numpy>=1.26",
