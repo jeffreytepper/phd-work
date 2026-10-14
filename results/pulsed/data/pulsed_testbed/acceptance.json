@@ -1,0 +1,85 @@
+[
+ {
+  "item": "every condition trains (test corr > 0.7)",
+  "value": {
+   "bump": 0.847,
+   "narrow": 0.828,
+   "wide": 0.862,
+   "fast": 0.794,
+   "slow": 0.879,
+   "dim": 0.843,
+   "network": 0.912,
+   "net_inhibit": 0.905,
+   "net_excite": 0.917
+  },
+  "passed": true
+ },
+ {
+  "item": "per-neuron profiles average to Braun's mean profile (max abs diff)",
+  "value": 0.0,
+  "passed": true
+ },
+ {
+  "item": "narrow: pulse effect localized at the pulse (|pulsed - control| per group)",
+  "value": {
+   "before": 0.064,
+   "at": 2.036,
+   "after": 0.182
+  },
+  "passed": true
+ },
+ {
+  "item": "wide: pulse effect localized at the pulse (|pulsed - control| per group)",
+  "value": {
+   "before": 0.083,
+   "at": 0.79,
+   "after": 0.152
+  },
+  "passed": true
+ },
+ {
+  "item": "fast: pulse effect localized at the pulse (|pulsed - control| per group)",
+  "value": {
+   "before": 0.45,
+   "at": 1.684,
+   "after": 0.642
+  },
+  "passed": true
+ },
+ {
+  "item": "slow: pulse effect localized at the pulse (|pulsed - control| per group)",
+  "value": {
+   "before": 0.49,
+   "at": 1.066,
+   "after": 0.421
+  },
+  "passed": true
+ },
+ {
+  "item": "dim: pulse effect localized at the pulse (|pulsed - control| per group)",
+  "value": {
+   "before": 0.048,
+   "at": 1.108,
+   "after": 0.114
+  },
+  "passed": true
+ },
+ {
+  "item": "net_inhibit: pulse effect localized at the pulse (|pulsed - control| per group)",
+  "value": {
+   "before": 0.482,
+   "at": 0.807,
+   "after": 0.629
+  },
+  "passed": true
+ },
+ {
+  "item": "net_excite: pulse effect localized at the pulse (|pulsed - control| per group)",
+  "value": {
+   "before": 0.546,
+   "at": 0.948,
+   "after": 0.552
+  },
+  "passed": true
+ }
+]

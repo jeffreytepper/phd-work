@@ -1,0 +1,61 @@
+{
+ "figure": "pulsed_testbed",
+ "panel": "A_targets",
+ "params": {
+  "bump": {
+   "base": "bump"
+  },
+  "narrow": {
+   "base": "bump",
+   "control": "bump",
+   "param": "width_scale",
+   "height": -0.5
+  },
+  "wide": {
+   "base": "bump",
+   "control": "bump",
+   "param": "width_scale",
+   "height": 0.6
+  },
+  "fast": {
+   "base": "bump",
+   "control": "bump",
+   "param": "gain",
+   "height": 1.5
+  },
+  "slow": {
+   "base": "bump",
+   "control": "bump",
+   "param": "gain",
+   "height": -0.6
+  },
+  "dim": {
+   "base": "bump",
+   "control": "bump",
+   "param": "amplitude",
+   "height": -0.5
+  },
+  "network": {
+   "base": "network"
+  },
+  "net_inhibit": {
+   "base": "network",
+   "control": "network",
+   "param": "drive",
+   "height": -0.75,
+   "width": 1.0
+  },
+  "net_excite": {
+   "base": "network",
+   "control": "network",
+   "param": "drive",
+   "height": 1.0,
+   "width": 1.0
+  }
+ },
+ "time": "2026-10-14 13:54:54",
+ "git": {
+  "commit": "05edd08fd7e617536308832f802c842a9111a833",
+  "dirty_seqnet": true
+ }
+}

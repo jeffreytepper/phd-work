@@ -1,0 +1,33 @@
+# Testbed: FORCE training and connectivity analysis on sequences with a control pulsed inside the training snippet
+# (seqnet.experiments.pulsed).  Every realization trains on the same snippet: one pass of the bump around the ring
+# starting at t = 0, with the pulse in the middle.  Each pulsed condition has an unpulsed control.
+N: 501
+bases:                       # seqnet.sequences specs
+  bump:    {kind: lehr_bump, N: 501, k: 4}
+  network: {kind: time_scaled, period: 8.5, sequence: {kind: lehr_network, N: 501, duration: 2.0, record_every: 2}}
+pulse: {t_peak: 4.25, width: 0.5}   # s on the training clock (centre of the 8.5-s pass; SD); per-condition overrides
+conditions:                  # base; control = unpulsed condition to compare with; param, height (and width) of the pulse
+  bump:        {base: bump}
+  narrow:      {base: bump, control: bump, param: width_scale, height: -0.5}
+  wide:        {base: bump, control: bump, param: width_scale, height: 0.6}
+  fast:        {base: bump, control: bump, param: gain, height: 1.5}
+  slow:        {base: bump, control: bump, param: gain, height: -0.6}
+  dim:         {base: bump, control: bump, param: amplitude, height: -0.5}
+  network:     {base: network}
+  net_inhibit: {base: network, control: network, param: drive, height: -0.75, width: 1.0}
+  net_excite:  {base: network, control: network, param: drive, height: 1.0, width: 1.0}
+training:                    # FORCE (Braun's settings otherwise); not final settings
+  n_realizations: 6
+  n_train: 150
+  n_test: 10
+  passes: 1
+analysis:
+  direction: [in, out]       # incoming (rows) and outgoing (columns) profiles
+  d_max: 70                  # profile window, neurons
+  smooth: 9                  # moving mean over neighbouring neurons for the along-sequence views
+  clip: 0.4                  # weight colour range
+  zoom: 120                  # half-width of the zoomed matrix, neurons
+  groups:                    # neuron offsets from the pulse neuron (bump centre at the pulse peak)
+    before: [-170, -130]
+    at: [-20, 20]
+    after: [130, 170]

@@ -266,3 +266,49 @@ def test_time_scaling():
     assert np.std(v) < 0.02 * np.mean(v)  # settled from the first sample
     with pytest.raises(ValueError):
         build_sequence({"kind": "time_scaled", "sequence": net})
+
+
+# ---------------------------------------------------------------------------------------------- pulsed testbed helpers
+def test_local_profiles_average_to_the_mean_profile():
+    from seqnet import conventions as cv
+    from seqnet.analysis import neuron_profiles as npf
+
+    rng = np.random.default_rng(3)
+    W = rng.normal(size=(2, 31, 31))
+    for direction in ("in", "out"):
+        P = npf.local_profiles(W, direction)
+        np.testing.assert_allclose(P.mean(-2), cv.profile_from_matrix(W), atol=1e-12)
+    np.testing.assert_array_equal(npf.local_profiles(W[0])[4, 3], W[0, 4, 7])
+    np.testing.assert_array_equal(npf.local_profiles(W[0], "out")[4, 3], W[0, 1, 4])
+    C = cv.circulant_from_profile(rng.normal(size=31))  # every neuron has the same profile
+    P = npf.local_profiles(C)
+    np.testing.assert_allclose(P, np.broadcast_to(P[0], P.shape), atol=1e-12)
+    g = npf.neuron_groups(30.4, 31, {"a": (-1, 2)})
+    np.testing.assert_array_equal(g["a"], [29, 30, 0, 1])
+    d, p = npf.window(P[:1], 3)
+    s = npf.profile_summary(d, p[0])
+    assert s["self"] == pytest.approx(C[0, 0]) and -1 <= s["asymmetry"] <= 1
+
+
+def test_pulsed_specs_and_snippets():
+    from seqnet.experiments import pulsed as pz
+
+    base = {"kind": "lehr_bump", "N": 200, "k": 4}
+    assert pz.pulsed_spec(base, None) == base
+    pulse = pz.Pulse("gain", 1.0, 4.25, 0.5)
+    spec = pz.pulsed_spec(base, pulse)
+    assert spec["gain"] == {"kind": "gaussian_pulse", "baseline": 1.0, "height": 1.0, "t_peak": 4.25, "width": 0.5}
+    assert "gain" not in base  # the base spec is not modified
+    assert pz.pass_duration(build_sequence(base)) == pytest.approx(BRAUN_PERIOD, abs=1e-3)
+    # a speed pulse of area h w sqrt(2 pi) shortens the pass by that many base periods' worth of time
+    expected = BRAUN_PERIOD - 1.0 * 0.5 * np.sqrt(2 * np.pi)
+    assert pz.pass_duration(build_sequence(spec)) == pytest.approx(expected, abs=1e-3)
+    assert pz.pulse_neuron(build_sequence(base), 4.25) == pytest.approx(100, abs=0.5)
+    # network pulses are converted to model time
+    net = {"kind": "time_scaled", "period": 8.5, "sequence": {"kind": "lehr_network", "N": 100, "duration": 2.0}}
+    ns = pz.pulsed_spec(net, pz.Pulse("drive", -0.5, 4.25, 1.0))
+    f = ns["factor"]
+    assert "period" not in ns and ns["sequence"]["drive"]["t_peak"] == pytest.approx(4.25 / f)
+    cfg = pz.condition_config(spec, n_train=1, n_test=1)
+    assert cfg.snippet_start_max == 0.0
+    assert abs((cfg.steps_per_iter - 1) * cfg.dt - expected) < cfg.dt

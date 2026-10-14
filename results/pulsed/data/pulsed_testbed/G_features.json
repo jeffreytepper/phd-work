@@ -1,0 +1,18 @@
+{
+ "figure": "pulsed_testbed",
+ "panel": "G_features",
+ "params": {
+  "features": [
+   "self",
+   "peak",
+   "trough",
+   "asymmetry"
+  ],
+  "smooth": 9
+ },
+ "time": "2026-10-14 14:28:48",
+ "git": {
+  "commit": "05edd08fd7e617536308832f802c842a9111a833",
+  "dirty_seqnet": true
+ }
+}

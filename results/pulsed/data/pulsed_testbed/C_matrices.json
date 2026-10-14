@@ -1,0 +1,13 @@
+{
+ "figure": "pulsed_testbed",
+ "panel": "C_matrices",
+ "params": {
+  "clip": 0.4,
+  "zoom": 120
+ },
+ "time": "2026-10-14 14:28:34",
+ "git": {
+  "commit": "05edd08fd7e617536308832f802c842a9111a833",
+  "dirty_seqnet": true
+ }
+}

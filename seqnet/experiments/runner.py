@@ -15,11 +15,11 @@ from __future__ import annotations
 
 import hashlib
 import json
+import multiprocessing as mp
 import os
 import platform
 import subprocess
 import time
-from concurrent.futures import ProcessPoolExecutor
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -143,8 +143,11 @@ def run_condition(
     R_test0 = f_target0 = None
     jobs = [(cfg_d, r, r in keep_W0) for r in range(n_realizations)]
     results = {}
-    with ProcessPoolExecutor(max_workers=n_workers) as ex:
-        for r, out in ex.map(_worker, jobs):
+    # multiprocessing.Pool, not ProcessPoolExecutor: leaving the block terminates the workers instead of waiting for
+    # them to exit; on Windows an executor occasionally left idle workers that never exited, hanging the run after
+    # every result had arrived (2026-10-14).  Results are collected before the block ends, so nothing is lost.
+    with mp.get_context("spawn").Pool(n_workers) as pool:
+        for r, out in pool.imap(_worker, jobs):
             results[r] = True
             J = out["J"]
             sumW = J.copy() if sumW is None else sumW + J

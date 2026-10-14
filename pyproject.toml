@@ -12,7 +12,7 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pytest>=8"]
-notebooks = ["nbformat>=5", "nbconvert>=7", "nbclient>=0.10", "ipykernel>=6"]
+notebooks = ["nbformat>=5", "nbconvert>=7", "nbclient>=0.10", "ipykernel>=6", "jupyterlab>=4"]
 
 [build-system]
 requires = ["hatchling"]

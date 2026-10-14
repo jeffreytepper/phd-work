@@ -1,0 +1,29 @@
+{
+ "figure": "pulsed_testbed",
+ "panel": "F_groups",
+ "params": {
+  "groups": {
+   "before": [
+    -170,
+    -130
+   ],
+   "at": [
+    -20,
+    20
+   ],
+   "after": [
+    130,
+    170
+   ]
+  },
+  "direction": [
+   "in",
+   "out"
+  ]
+ },
+ "time": "2026-10-14 14:28:41",
+ "git": {
+  "commit": "05edd08fd7e617536308832f802c842a9111a833",
+  "dirty_seqnet": true
+ }
+}
