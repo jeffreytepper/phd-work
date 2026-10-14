@@ -1,0 +1,130 @@
+[
+ {
+  "item": "every condition trains (test corr > 0.7)",
+  "value": 0.771,
+  "passed": true
+ },
+ {
+  "item": "width_scale: change peaks within the bump's half-support (63) of the pulse neuron (peak - pulse neuron, neurons)",
+  "value": [
+   18.7,
+   19.5,
+   23.3
+  ],
+  "passed": true
+ },
+ {
+  "item": "width_scale: total change grows with |height| (negative pulses)",
+  "value": {
+   "0.3": 151.4,
+   "0.5": 234.7,
+   "0.6": 289.9
+  },
+  "passed": true
+ },
+ {
+  "item": "width_scale: total change grows with |height| (positive pulses)",
+  "value": {
+   "0.3": 114.1,
+   "0.6": 176.1,
+   "1": 207.7
+  },
+  "passed": true
+ },
+ {
+  "item": "width_scale: the change widens with the pulse width (FWHM, neurons)",
+  "value": [
+   55.8,
+   75.1,
+   148.8
+  ],
+  "passed": true
+ },
+ {
+  "item": "gain: change peaks within the bump's half-support (63) of the pulse neuron (peak - pulse neuron, neurons)",
+  "value": [
+   38.3,
+   5.1,
+   -8.1
+  ],
+  "passed": true
+ },
+ {
+  "item": "gain: total change grows with |height| (negative pulses)",
+  "value": {
+   "0.3": 23.7,
+   "0.6": 59.3
+  },
+  "passed": true
+ },
+ {
+  "item": "gain: total change grows with |height| (positive pulses)",
+  "value": {
+   "0.5": 36.8,
+   "1": 105.1,
+   "1.5": 172.4
+  },
+  "passed": true
+ },
+ {
+  "item": "gain: the change widens with the pulse width (FWHM, neurons)",
+  "value": [
+   45.0,
+   141.7,
+   157.0
+  ],
+  "passed": true
+ },
+ {
+  "item": "amplitude: change peaks within the bump's half-support (63) of the pulse neuron (peak - pulse neuron, neurons)",
+  "value": [
+   -48.3,
+   -25.5,
+   -30.7
+  ],
+  "passed": true
+ },
+ {
+  "item": "amplitude: total change grows with |height| (negative pulses)",
+  "value": {
+   "0.25": 88.1,
+   "0.5": 125.8,
+   "0.75": 203.7
+  },
+  "passed": true
+ },
+ {
+  "item": "amplitude: the change widens with the pulse width (FWHM, neurons)",
+  "value": [
+   44.9,
+   102.1,
+   156.7
+  ],
+  "passed": true
+ },
+ {
+  "item": "gain -0.6: implied speed follows the target speed (corr, interior)",
+  "value": 0.304,
+  "passed": false
+ },
+ {
+  "item": "gain -0.3: implied speed follows the target speed (corr, interior)",
+  "value": 0.462,
+  "passed": false
+ },
+ {
+  "item": "gain +0.5: implied speed follows the target speed (corr, interior)",
+  "value": 0.898,
+  "passed": true
+ },
+ {
+  "item": "gain +1: implied speed follows the target speed (corr, interior)",
+  "value": 0.97,
+  "passed": true
+ },
+ {
+  "item": "gain +1.5: implied speed follows the target speed (corr, interior)",
+  "value": 0.959,
+  "passed": true
+ }
+]

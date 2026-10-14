@@ -81,5 +81,50 @@
    "after": 0.552
   },
   "passed": true
+ },
+ {
+  "item": "fast: harmonics track the speed change (corr of the fitted implied speed with the target speed, interior)",
+  "value": 0.952,
+  "passed": true
+ },
+ {
+  "item": "slow: harmonics track the speed change (corr of the fitted implied speed with the target speed, interior)",
+  "value": 0.2,
+  "passed": false
+ },
+ {
+  "item": "narrow: share of the change in its first shape (mode 1)",
+  "value": 0.694,
+  "passed": null
+ },
+ {
+  "item": "wide: share of the change in its first shape (mode 1)",
+  "value": 0.588,
+  "passed": null
+ },
+ {
+  "item": "fast: share of the change in its first shape (mode 1)",
+  "value": 0.502,
+  "passed": null
+ },
+ {
+  "item": "slow: share of the change in its first shape (mode 1)",
+  "value": 0.198,
+  "passed": null
+ },
+ {
+  "item": "dim: share of the change in its first shape (mode 1)",
+  "value": 0.748,
+  "passed": null
+ },
+ {
+  "item": "net_inhibit: share of the change in its first shape (mode 1)",
+  "value": 0.136,
+  "passed": null
+ },
+ {
+  "item": "net_excite: share of the change in its first shape (mode 1)",
+  "value": 0.257,
+  "passed": null
  }
 ]

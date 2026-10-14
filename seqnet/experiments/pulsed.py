@@ -22,10 +22,10 @@ import numpy as np
 from ..paths import repo_root
 from ..sequences import Sequence, build_sequence, measures
 from ..training.config import ForceConfig
-from .runner import RunResult, run_condition
+from .runner import RunResult, run_condition, run_hashes
 
-__all__ = ["Pulse", "pulsed_spec", "resolve_time_scale", "pass_duration", "pulse_neuron", "condition_config", "run",
-           "RUNS"]
+__all__ = ["Pulse", "pulsed_spec", "resolve_time_scale", "pass_duration", "pulse_neuron", "snippet_start", "speed_along_snippet",
+           "condition_config", "run", "sweep_conditions", "train_sweep", "RUNS"]
 
 RUNS = ("results", "pulsed", "runs")
 _BASELINE = {"gain": 1.0, "width_scale": 1.0, "amplitude": 1.0, "drive": 0.0}
@@ -85,6 +85,20 @@ def pulse_neuron(seq: Sequence, t_peak: float) -> float:
     return float(measures.bump_position(seq.rates(np.array([t_peak])))[0] % seq.N)
 
 
+def snippet_start(seq: Sequence) -> float:
+    """Sequence position (neuron index, 0..N) of the bump centre at t = 0, where every snippet starts."""
+    return pulse_neuron(seq, 0.0)
+
+
+def speed_along_snippet(seq: Sequence, T_snip: float, dt: float = 0.005) -> tuple[np.ndarray, np.ndarray]:
+    """(snippet position 0..N, bump speed in neurons / s when the bump passes it), from the measured bump position."""
+    t = np.arange(0.0, T_snip + dt, dt)
+    pos = measures.bump_position(seq.rates(t))
+    s = pos - pos[0]
+    v = np.gradient(pos, dt)
+    return s, v
+
+
 def condition_config(spec: dict, n_train: int, n_test: int, passes: float = 1.0, **overrides) -> ForceConfig:
     """Braun's FORCE settings on one fixed snippet of ``passes`` bump passes starting at t = 0."""
     base = ForceConfig(sequence=spec, n_train=n_train, n_test=n_test, snippet_start_max=0.0)
@@ -93,6 +107,49 @@ def condition_config(spec: dict, n_train: int, n_test: int, passes: float = 1.0,
 
 
 def run(name: str, cfg: ForceConfig, n_realizations: int, settings: str = "testbed", store_full="all") -> RunResult:
-    """Train (or load) one condition under results/pulsed/runs."""
-    return run_condition(cfg, n_realizations, label=f"{settings}-{name}", store_full=store_full, settings=settings,
-                         root=repo_root().joinpath(*RUNS))
+    """Train (or load) one condition under results/pulsed/runs.  A run of the same configuration cached under another
+    name is reused rather than retrained."""
+    root = repo_root().joinpath(*RUNS)
+    label = f"{settings}-{name}"
+    for h in run_hashes(cfg, n_realizations):
+        hits = sorted(root.glob(f"*-{h}/summary.npz")) if root.exists() else []
+        if hits and not (root / f"{label}-{h}").exists():
+            label = hits[0].parent.name[: -len(h) - 1]
+            break
+    return run_condition(cfg, n_realizations, label=label, store_full=store_full, settings=settings, root=root)
+
+
+def sweep_conditions(sweep: dict) -> dict[str, tuple[dict, Pulse | None]]:
+    """Name -> (sequence spec, pulse) for a sweep config (configs/pulsed/pulsed_sweep.yaml): the control, then for
+    each control parameter its heights at the default width and position, and its default height at every width and
+    every position.  Names are canonical, e.g. ``gain+1.5_w0.5_t4.25``."""
+    w0, t0 = sweep["default"]["width"], sweep["default"]["t_peak"]
+    out: dict[str, tuple[dict, Pulse | None]] = {sweep["control"]: (pulsed_spec(sweep["base"], None), None)}
+    for param, c in sweep["controls"].items():
+        pulses = [Pulse(param, h, t0, w0) for h in c["heights"]]
+        pulses += [Pulse(param, c["default_height"], t0, w) for w in sweep["widths"]]
+        pulses += [Pulse(param, c["default_height"], t, w0) for t in sweep["positions"]]
+        for p in pulses:
+            out.setdefault(f"{p.param}{p.height:+g}_w{p.width:g}_t{p.t_peak:g}", (pulsed_spec(sweep["base"], p), p))
+    return out
+
+
+def train_sweep(sweep: dict, settings: str = "testbed") -> dict[str, RunResult]:
+    """Train (or load) every condition of a sweep config."""
+    tr = sweep["training"]
+    out = {}
+    for name, (spec, _) in sweep_conditions(sweep).items():
+        cfg = condition_config(spec, tr["n_train"], tr["n_test"], tr.get("passes", 1.0))
+        r = run(name, cfg, tr["n_realizations"], settings)
+        print(f"{name:32s} test corr {r.summary['corr'][:, -tr['n_test']:].mean():.3f}  {r.path.name}", flush=True)
+        out[name] = r
+    return out
+
+
+if __name__ == "__main__":
+    import sys
+
+    import yaml
+
+    for path in sys.argv[1:]:
+        train_sweep(yaml.safe_load(open(path, encoding="utf-8")))

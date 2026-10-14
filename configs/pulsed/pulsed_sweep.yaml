@@ -1,0 +1,24 @@
+# Sweeps of the pulse for the three parametric controls of the cosine bump: height, width (SD) and position, each
+# varied around a default with the others at the default.  Protocol as in pulsed_testbed.yaml (one fixed one-pass
+# snippet from t = 0; 6 realizations).  Train with:  python -m seqnet.experiments.pulsed configs/pulsed/pulsed_sweep.yaml
+N: 501
+base: {kind: lehr_bump, N: 501, k: 4}
+control: bump                      # name of the unpulsed control run
+default: {width: 0.5, t_peak: 4.25}
+controls:                          # heights swept at the default width and position; default_height for the other sweeps
+  width_scale: {heights: [-0.6, -0.5, -0.3, 0.3, 0.6, 1.0], default_height: -0.5}
+  gain:        {heights: [-0.6, -0.3, 0.5, 1.0, 1.5], default_height: 1.5}
+  amplitude:   {heights: [-0.75, -0.5, -0.25], default_height: -0.5}
+widths: [0.25, 0.5, 1.0]           # s
+positions: [3.5, 4.25, 5.0]        # s (the bump is at the snippet's middle neuron at 4.25 s)
+training: {n_realizations: 6, n_train: 150, n_test: 10, passes: 1}
+analysis:
+  d_max: 70
+  smooth: 9
+  edge: 60                         # neurons at each end of the snippet excluded from across-neuron statistics
+  bin: 20                          # neurons per overlaid profile
+  harmonics: 12
+  spectral_d_max: 100        # harmonics of the local profile |d| <= this (neuron_profiles.local_spectra)
+  speed_harmonics: [1, 2, 3, 4]  # harmonics fitted for the implied speed
+  stretch_min_r2: 0.6         # stretch fits below this r2 are left blank
+  groups: {before: [-170, -130], at: [-20, 20], after: [130, 170]}

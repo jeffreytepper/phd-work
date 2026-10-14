@@ -27,6 +27,12 @@ analysis:
   smooth: 9                  # moving mean over neighbouring neurons for the along-sequence views
   clip: 0.4                  # weight colour range
   zoom: 120                  # half-width of the zoomed matrix, neurons
+  edge: 60                   # neurons at each end of the snippet left out of across-neuron statistics
+  bin: 20                    # neurons per overlaid / stacked profile
+  harmonics: 12              # spatial harmonics k shown
+  spectral_d_max: 100        # harmonics of the local profile |d| <= this (neuron_profiles.local_spectra)
+  speed_harmonics: [1, 2, 3, 4]  # harmonics fitted for the implied speed
+  stretch_min_r2: 0.6         # stretch fits below this r2 are left blank
   groups:                    # neuron offsets from the pulse neuron (bump centre at the pulse peak)
     before: [-170, -130]
     at: [-20, 20]

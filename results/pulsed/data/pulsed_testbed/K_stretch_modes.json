@@ -1,0 +1,12 @@
+{
+ "figure": "pulsed_testbed",
+ "panel": "K_stretch_modes",
+ "params": {
+  "modes": 2
+ },
+ "time": "2026-10-14 19:08:08",
+ "git": {
+  "commit": "ebbfbf568ac61d7c2f8aa7626dd578c77efa94e4",
+  "dirty_seqnet": true
+ }
+}

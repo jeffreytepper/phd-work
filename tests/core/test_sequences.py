@@ -312,3 +312,46 @@ def test_pulsed_specs_and_snippets():
     cfg = pz.condition_config(spec, n_train=1, n_test=1)
     assert cfg.snippet_start_max == 0.0
     assert abs((cfg.steps_per_iter - 1) * cfg.dt - expected) < cfg.dt
+
+
+def test_profile_change_views():
+    from seqnet import conventions as cv
+    from seqnet.analysis import neuron_profiles as npf
+    from seqnet.spectral import braun_map as bm
+
+    rng = np.random.default_rng(5)
+    W = rng.normal(size=(40, 40))
+    P = npf.local_profiles(W)
+    lam = npf.local_spectra(P, drop_self=False)
+    np.testing.assert_allclose(lam.mean(0), cv.eigs_from_profile(cv.profile_from_matrix(W)), atol=1e-10)
+    # a circulant supporting Braun's sequence (supplement convention) implies exactly its speed N / T on every row
+    N, tau = 64, 0.3224
+    wave = braun_sequence(N=N, amp=0.5, width=1.0, offset=0.1).stationary()
+    cp = bm.profile_from_mode_eigs(bm.required_eigs(wave, tau, K_max=4), N)
+    lamc = npf.local_spectra(npf.local_profiles(cv.circulant_from_profile(cp)), drop_self=False)
+    for k in (1, 2, 3, [1, 2, 3]):
+        np.testing.assert_allclose(npf.implied_speed(lamc, k, tau, N), N / wave.period, rtol=1e-6)
+    # windowed spectra ignore a change far from each row's own neurons (a column stripe)
+    C = cv.circulant_from_profile(cp)
+    Cs = C.copy(); Cs[:, 40] += 0.3
+    lam_w, lam_ws = (npf.local_spectra(npf.local_profiles(X), d_max=10) for X in (C, Cs))
+    far = np.abs((np.arange(N) - 40 + N // 2) % N - N // 2) > 10
+    np.testing.assert_allclose(lam_ws[far], lam_w[far], atol=1e-12)
+    # dilation: a profile stretched by 1.3 is recovered
+    d = np.arange(-70, 71)
+    ref = np.exp(-((d + 30) ** 2) / 200) + 0.8 * np.exp(-((d - 5) ** 2) / 50)
+    fit = npf.dilation_fit(d, np.stack([2.0 * np.interp(d / 1.3, d, ref), ref]), ref)
+    np.testing.assert_allclose(fit["scale"], [1.3, 1.0], rtol=0.02)
+    np.testing.assert_allclose(fit["amplitude"][0], 2.0, rtol=0.02)
+    # difference modes: a rank-one change is one mode carrying all of it
+    shape, weight = rng.normal(size=141), np.exp(-((np.arange(200) - 100) ** 2) / 300)
+    m = npf.difference_modes(np.outer(weight, shape), 2)
+    assert m["explained"][0] == pytest.approx(1.0)
+    np.testing.assert_allclose(np.abs(m["modes"][0] @ shape) / np.linalg.norm(shape), 1.0, rtol=1e-10)
+    # variance along the sequence: none for identical rows; binning
+    Pc = np.broadcast_to(ref, (3, 50, d.size))
+    v = npf.variance_along_sequence(Pc)
+    assert np.allclose(v["across"], 0) and np.allclose(v["noise"], 0)
+    B, c = npf.binned_profiles(np.arange(50.0)[:, None] * np.ones((1, 3)), 20)
+    np.testing.assert_allclose(B[:, 0], [9.5, 29.5])
+    np.testing.assert_allclose(c, [10, 30])
