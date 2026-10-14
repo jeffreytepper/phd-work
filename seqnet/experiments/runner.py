@@ -26,20 +26,11 @@ from pathlib import Path
 import numpy as np
 
 from ..conventions import profile_from_matrix
+from ..paths import repo_root
+from ..training.config import legacy_layout
 from ..training.rls import ForceConfig, train_realization
 
-__all__ = ["repo_root", "git_info", "run_condition", "RunResult", "config_hash"]
-
-
-def repo_root() -> Path:
-    env = os.environ.get("SEQNET_ROOT")
-    if env:
-        return Path(env)
-    p = Path.cwd().resolve()
-    for q in [p, *p.parents]:
-        if (q / "pyproject.toml").exists():
-            return q
-    return Path(__file__).resolve().parents[2]
+__all__ = ["repo_root", "git_info", "run_condition", "RunResult", "config_hash", "run_hashes"]
 
 
 def git_info() -> dict:
@@ -71,6 +62,17 @@ def config_hash(d: dict) -> str:
     return hashlib.sha1(json.dumps(_strip_late(d), sort_keys=True).encode()).hexdigest()[:10]
 
 
+def run_hashes(cfg: ForceConfig | dict, n_realizations: int) -> tuple[str, str]:
+    """(hash, fallback hash) naming a condition's run directory.
+
+    Targets the pre-sequences layout could express are hashed in that layout, so their cached runs stay valid.  The
+    fallback is the hash of the full dict, used by runs cached between adding a config field and _LATE_DEFAULTS.
+    """
+    cfg_d = (cfg if isinstance(cfg, ForceConfig) else ForceConfig.from_dict(cfg)).as_dict()
+    key = {"cfg": legacy_layout(cfg_d), "n_realizations": n_realizations}
+    return config_hash(key), hashlib.sha1(json.dumps(key, sort_keys=True).encode()).hexdigest()[:10]
+
+
 def _worker(args):
     cfg_dict, r, keep_W0 = args
     return r, train_realization(ForceConfig(**cfg_dict), r, keep_W0=keep_W0)
@@ -87,6 +89,11 @@ class RunResult:
 
     def W0(self, r: int) -> np.ndarray:
         return np.load(self.path / f"W_{r}.npz")["J0"]
+
+    @property
+    def config(self) -> ForceConfig:
+        """The run's configuration (stored in the current or the legacy layout)."""
+        return ForceConfig.from_dict(self.meta["config"])
 
     def has_W(self, r: int) -> bool:
         return (self.path / f"W_{r}.npz").exists()
@@ -111,14 +118,10 @@ def run_condition(
     force: bool = False,
 ) -> RunResult:
     """Train (or load) ``n_realizations`` networks for one condition (Braun Fig. 1C procedure)."""
-    cfg_d = cfg.as_dict() if isinstance(cfg, ForceConfig) else dict(cfg)
-    ForceConfig(**cfg_d)  # validate
-    key = {"cfg": cfg_d, "n_realizations": n_realizations}
-    h = config_hash(key)
+    cfg_d = (cfg if isinstance(cfg, ForceConfig) else ForceConfig.from_dict(cfg)).as_dict()
+    h, h_full = run_hashes(cfg_d, n_realizations)
     base = (root or repo_root() / "results" / "wp0" / "runs")
     path = base / f"{label}-{h}"
-    # runs cached between adding a config field and _LATE_DEFAULTS used the full-dict hash; accept those too
-    h_full = hashlib.sha1(json.dumps(key, sort_keys=True).encode()).hexdigest()[:10]
     if not (path / "summary.npz").exists() and (base / f"{label}-{h_full}" / "summary.npz").exists():
         path, h = base / f"{label}-{h_full}", h_full
     if (path / "summary.npz").exists() and not force:

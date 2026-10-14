@@ -23,7 +23,7 @@ from pathlib import Path
 
 import numpy as np
 
-from .common import BumpFit, activity_bump, fit_bump, movmean, normalize_max, order_by_peak, resample_bins
+from .preprocessing import BumpFit, activity_bump, fit_bump, movmean, normalize_max, order_by_peak, resample_bins
 
 __all__ = ["load_zscored", "BatTarget", "preprocess", "bump_fit", "DEFAULT_PATH"]
 

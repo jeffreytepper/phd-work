@@ -6,7 +6,7 @@ from scipy.linalg import expm
 from seqnet import conventions as cv
 from seqnet.analysis.motifs import motifs
 from seqnet.spectral import braun_map as bm
-from seqnet.targets import SequenceSpec, fourier_coeffs_gaussian, wrapped_gaussian
+from seqnet.sequences import WrappedGaussian, braun_sequence, logit_target
 
 rng = np.random.default_rng(0)
 
@@ -39,7 +39,7 @@ def test_T3_kernel_temporal_conversion():
     """k(r_n) = f0(-n T/N); round trip exact; |k_hat_m|^2 = N |f_hat_m|^2 on the bin grid (spec 4.2 [VERIFY])."""
     N, T = 101, 8.5
     t = np.arange(N) * T / N
-    f0 = 0.5 * wrapped_gaussian(t, 0.9, T) + 0.1 + 0.05 * np.sin(2 * np.pi * t / T)  # asymmetric on purpose
+    f0 = braun_sequence(N, T, 0.5, 0.9, 0.1).stationary().profile(t) + 0.05 * np.sin(2 * np.pi * t / T)  # asymmetric
     k = cv.kernel_from_temporal_profile(f0)
     np.testing.assert_allclose(cv.temporal_profile_from_kernel(k), f0, atol=1e-14)
     # the population snapshot at t = 0 of the sequence f_n(t) = f0(t - n T/N)
@@ -51,11 +51,11 @@ def test_T3_kernel_temporal_conversion():
 
 def test_T4_gaussian_fourier_coefficients():
     """Numerical temporal coefficients of the wrapped-Gaussian target match Braun Suppl. eq. 3 (1e-8 relative)."""
-    spec = SequenceSpec(N=501, amp=0.5, width=1.0, offset=0.2)
-    sp = bm.bump_spectra(spec, 0.3224, n_t=4096)
+    wave = braun_sequence(N=501, amp=0.5, width=1.0, offset=0.2).stationary()
+    sp = bm.bump_spectra(wave, 0.3224, n_t=4096)
     k = np.arange(-15, 16)
     num = sp["f_hat"][k % 4096]
-    ana = fourier_coeffs_gaussian(k, spec.amp, spec.width, spec.offset, spec.T)
+    ana = wave.fourier_coeffs(k).real
     big = np.abs(ana) > 1e-9 * np.abs(ana).max()
     np.testing.assert_allclose(num.real[big], ana[big], rtol=1e-8)  # 1e-8 relative where above roundoff
     np.testing.assert_allclose(num.real, ana, atol=1e-14)
@@ -63,13 +63,15 @@ def test_T4_gaussian_fourier_coefficients():
 
 
 def test_T5_image_truncation():
-    t = np.linspace(-20, 20, 2001)
+    """Six images suffice: the truncated wrapped Gaussian equals a 20-image sum (widths in neurons, N = 501, T = 8.5 s)."""
+    d = np.linspace(-1200, 1200, 2001)
     for s in (0.5, 1.0, 1.9):
-        np.testing.assert_allclose(wrapped_gaussian(t, s, 8.5, 6), wrapped_gaussian(t, s, 8.5, 20), atol=1e-12)
+        w = s * 501 / 8.5
+        np.testing.assert_allclose(WrappedGaussian(6).value(d, w, 501), WrappedGaussian(20).value(d, w, 501), atol=1e-12)
 
 
-def _D_mode_sequence(spec, tau, D, N, ts):
-    sp = bm.bump_spectra(spec, tau)
+def _D_mode_sequence(wave, tau, D, N, ts):
+    sp = bm.bump_spectra(wave, tau)
     n = np.arange(N)
     w = sp["omega"]
     F = np.zeros((N, ts.size))
@@ -84,8 +86,8 @@ def _D_mode_sequence(spec, tau, D, N, ts):
 def test_T6_degenerate_family_supports_sequence():
     """Any W = W_D + W~ with W~ P_D = 0 satisfies W f^(D)(t) = y*^(D)(t) (Braun Suppl. Prop. 3.1, 4.1; 1e-10)."""
     N, D, tau = 64, 8, 0.3224
-    spec = SequenceSpec(N=N, amp=0.5, width=1.0, offset=0.1)
-    eig = bm.required_eigs(spec, tau, K_max=D)
+    wave = braun_sequence(N=N, amp=0.5, width=1.0, offset=0.1).stationary()
+    eig = bm.required_eigs(wave, tau, K_max=D)
     W_D = np.zeros((N, N))
     n = np.arange(N)
     for k, lam in eig.items():
@@ -95,8 +97,8 @@ def test_T6_degenerate_family_supports_sequence():
 
     P = active_projector(N, D)
     Wt = rng.normal(size=(N, N)) @ (np.eye(N) - P)  # W~ P_D = 0
-    ts = np.linspace(0, spec.T, 37)
-    F, Y = _D_mode_sequence(spec, tau, D, N, ts)
+    ts = np.linspace(0, wave.period, 37)
+    F, Y = _D_mode_sequence(wave, tau, D, N, ts)
     for W in (W_D, W_D + Wt):
         np.testing.assert_allclose(W @ F, Y, atol=1e-10 * np.abs(Y).max())
 
@@ -134,12 +136,12 @@ def test_T8_odd_part_is_derivative_of_even_part():
     Restricted to modes with |f_hat_k| well above roundoff (here |k| <= 8 at width 1 s, |f_hat_8| ~ 1e-8): beyond them
     lambda_k = y_hat_k / f_hat_k is a ratio of roundoff-level numbers (spec 6.10 uses active modes only)."""
     N, tau = 501, 0.3224
-    spec = SequenceSpec(N=N, amp=0.5, width=1.0, offset=0.25)
+    wave = braun_sequence(N=N, amp=0.5, width=1.0, offset=0.25).stationary()
     K = 8
-    eig = bm.required_eigs(spec, tau, K_max=K)
+    eig = bm.required_eigs(wave, tau, K_max=K)
     cp = bm.profile_from_mode_eigs(eig, N)
     even, odd = cv.even_odd_split(cp)
-    w = 2 * np.pi / spec.T
+    w = wave.omega
     lam = cv.eigs_from_profile(even)  # spectral derivative of the even part in theta = 2 pi d / N
     k = cv.signed_modes(N)
     d_even = np.real(cv.ifft(1j * k * lam))
@@ -199,12 +201,12 @@ def test_T17_floquet_neutral_multiplier():
 
     N = 64
     prm = RNNParams()
-    spec = SequenceSpec(N=N, amp=0.5, width=1.7, offset=0.0)
-    eig = bm.required_eigs(spec, prm.tau, K_max=2)
+    seq = braun_sequence(N=N, amp=0.5, width=1.7, offset=0.0)
+    eig = bm.required_eigs(seq.stationary(), prm.tau, K_max=2)
     cp = bm.profile_from_mode_eigs(eig, N)
     J = cv.circulant_from_profile(cp)
-    guess = int(round(spec.T / prm.dt))
-    res = floquet(J, spec.h_target(np.array([0.0]))[:, 0], guess, prm, burn_periods=3)
+    guess = int(round(seq.stationary().period / prm.dt))
+    res = floquet(J, logit_target(seq, 0.0)[:, 0], guess, prm, burn_periods=3)
     if not res.sequence_kept:
         pytest.skip("this test network does not sustain the sequence without noise")
     # with an integer-step period the flow multiplier is 1 up to the closure error of the period estimate

@@ -10,7 +10,9 @@ from dataclasses import replace
 
 import numpy as np
 
-from ..training.rls import ForceConfig
+from ..paths import repo_root
+from ..sequences import TRAINING_DEFAULTS
+from ..training.config import BRAUN_SYNTHETIC, ForceConfig
 from .runner import RunResult, run_condition
 
 __all__ = ["SETTINGS", "condition", "GROUPS", "run_group", "get"]
@@ -23,9 +25,12 @@ SETTINGS = {
 }
 
 
-def condition(amp: float, width: float, offset: float, settings: str = "dev", **overrides) -> tuple[ForceConfig, int]:
+def condition(amp: float, width: float, offset: float, settings: str = "dev", N: int = 501,
+              **overrides) -> tuple[ForceConfig, int]:
+    """Braun synthetic target (a, sigma, b) with N neurons at ``settings``; ``overrides`` replace ForceConfig fields."""
     s = SETTINGS[settings]
-    cfg = ForceConfig(amp=amp, width=width, offset=offset, n_train=s["n_train"], n_test=s["n_test"])
+    seq = {**BRAUN_SYNTHETIC, "N": N, "amp": amp, "width": width, "offset": offset}
+    cfg = ForceConfig(sequence=seq, n_train=s["n_train"], n_test=s["n_test"])
     return replace(cfg, **overrides), s["n_realizations"]
 
 
@@ -69,39 +74,34 @@ def data_config() -> dict:
     """configs/wp0/data.yaml."""
     import yaml
 
-    from .runner import repo_root
-
     return yaml.safe_load((repo_root() / "configs" / "wp0" / "data.yaml").read_text(encoding="utf-8"))
+
+
+def dataset_spec(name: str, snippets: bool = True) -> dict:
+    """Sequence spec of the dataset ``name`` in configs/wp0/data.yaml, with Braun's snippet length if ``snippets``."""
+    d = data_config()[name]
+    spec = {"kind": d["kind"], "path": d["path"], **({"field": d["field"]} if "field" in d else {})}
+    sb = TRAINING_DEFAULTS[d["kind"]]["snippet_bins"]
+    if snippets and sb:
+        spec["snippet_bins"] = sb
+    return spec
 
 
 def get_data(name: str, settings: str = "final", store_full=5, **overrides) -> RunResult:
     """Train or load networks on an experimental target (Braun Fig. 3; spec WP0.7).
 
     ``name`` is a key of configs/wp0/data.yaml ('bat' or 'mec').  g, m, steps per iteration and snippet length follow
-    Braun's Methods (``seqnet.data.registry.DATA_DEFAULTS``).  Raises FileNotFoundError if the path is not set.
+    Braun's Methods (``seqnet.sequences.TRAINING_DEFAULTS``).  Raises FileNotFoundError if the path is not set.
     """
-    from pathlib import Path
-
-    from ..data.registry import DATA_DEFAULTS
-    from .runner import repo_root
-
     d = dict(data_config()[name])
-    if not d.get("path") or not (repo_root() / Path(d["path"])).exists():
+    if not d.get("path") or not (repo_root() / d["path"]).exists():
         raise FileNotFoundError(f"{name} data not available (configs/wp0/data.yaml: path = {d.get('path')!r})")
-    kind = d["kind"]
-    dd = DATA_DEFAULTS[kind]
-    spec = {"kind": kind, "path": d["path"]}
-    if "field" in d:
-        spec["field"] = d["field"]
-    if dd["snippet_bins"]:
-        spec["snippet_bins"] = dd["snippet_bins"]
+    dd = TRAINING_DEFAULTS[d["kind"]]
     s = SETTINGS[settings]
-    cfg = ForceConfig(data=spec, g_init=dd["g_init"], m=dd["m"], steps_per_iter=dd["steps_per_iter"],
+    cfg = ForceConfig(sequence=dataset_spec(name), g_init=dd["g_init"], m=dd["m"], steps_per_iter=dd["steps_per_iter"],
                       bin_size=dd["bin_size"], n_train=s["n_train"], n_test=s["n_test"])
     cfg = replace(cfg, **overrides)
-    from .runner import run_condition as _rc
-
-    return _rc(cfg, s["n_realizations"], label=f"{settings}-data_{name}", store_full=store_full, settings=settings)
+    return run_condition(cfg, s["n_realizations"], label=f"{settings}-data_{name}", store_full=store_full, settings=settings)
 
 
 def get_matched(name: str, which: str = "ours", settings: str = "final", store_full=5) -> RunResult:
@@ -113,21 +113,17 @@ def get_matched(name: str, which: str = "ours", settings: str = "final", store_f
     """
     import json
 
-    from ..data.registry import load_target
-    from .runner import repo_root
+    from ..sequences import build_sequence
 
     d = data_config()[name]
-    spec = {"kind": d["kind"], "path": d["path"], **({"field": d["field"]} if "field" in d else {})}
-    N = load_target(spec)[0].shape[0]
+    N = build_sequence(dataset_spec(name, snippets=False)).N
     if which == "paper":
         p = d["fit_paper"]
     else:
         p = json.loads((repo_root() / "results" / "wp0" / "data" / "braun_supp6" / f"fit_{name}.json").read_text())
     amp, width, offset = (round(float(p[k]), 3) for k in ("amp", "width", "offset"))
     cfg, R = condition(amp, width, offset, settings, N=N)
-    from .runner import run_condition as _rc
-
-    return _rc(cfg, R, label=f"{settings}-matched_{name}_{which}_{label_of(amp, width, offset)}", store_full=store_full,
+    return run_condition(cfg, R, label=f"{settings}-matched_{name}_{which}_{label_of(amp, width, offset)}", store_full=store_full,
                settings=settings)
 
 

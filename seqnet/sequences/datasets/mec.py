@@ -26,7 +26,7 @@ from pathlib import Path
 
 import numpy as np
 
-from .common import BumpFit, activity_bump, fit_bump, movmean, normalize_max, rescale_duration, resample_bins
+from .preprocessing import BumpFit, activity_bump, fit_bump, movmean, normalize_max, rescale_duration, resample_bins
 
 __all__ = ["MECSession", "load_session", "training_target", "mean_sequence", "bump_fit", "available"]
 

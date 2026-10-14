@@ -11,7 +11,7 @@ H0: Braun's synthetic results reproduce from the Methods, and learned profiles m
 | Module | Content | Source |
 | --- | --- | --- |
 | `seqnet/conventions.py` | profile ↔ matrix ↔ eigenvalues, shift, DFTs (the only `np.fft` user) | Braun eq. 11, Suppl. §3 |
-| `seqnet/targets.py` | wrapped Gaussian, sequences, logit target and its derivative, Fourier closed form | Braun eq. 4–6, Suppl. eq. 1–3 |
+| `seqnet/sequences/` | all sequence targets behind one interface: Braun's wrapped-Gaussian waves (`braun_sequence`), the Lehr et al. (2024) family (`lehr_bump`, `LehrRingNetwork`), logit targets and derivatives, Fourier closed forms; `datasets/` holds the bat and MEC loaders and preprocessing | Braun eq. 4–6, Suppl. eq. 1–3; Lehr et al. 2024 Methods |
 | `seqnet/models/rate_rnn.py` | Euler rate RNN with noise; silencing, current and noise perturbations | Braun eq. 1–3, 21–22 |
 | `seqnet/training/rls.py` | FORCE variant with all spec 6.7 switches; presynaptic masks (a), (b) | Braun eq. 7–10, 16–17 |
 | `seqnet/training/readout.py` | downstream rule; thesis wrappers | Braun lines 1264–1275 |
@@ -25,7 +25,7 @@ Tests in `tests/core/`: T1–T9 and T15 pass. T15 is corrected; see finding 1.
 
 `braun_fig1`, `braun_supp1`, `braun_fig2`, `braun_supp3` (Supp. 3–5 and Supp. 1F), `braun_fig4`, `braun_supp8`, `braun_supp9`, `braun_fig5` (Fig. 5 and Supp. 10), `wp0_8_supplement_check`.
 
-Data notebooks: `braun_supp6` (bump fits), `braun_fig3` (Fig. 3 and Supp. 7), `braun_fig4_data` (Fig. 4G/H, Supp. 9F–K). Bat panels run now; mouse panels run unchanged once `configs/wp0/data.yaml: mec.path` is set and `seqnet.data.mec.load_session` reads the delivered file format.
+Data notebooks: `braun_supp6` (bump fits), `braun_fig3` (Fig. 3 and Supp. 7), `braun_fig4_data` (Fig. 4G/H, Supp. 9F–K). Bat panels run now; mouse panels run unchanged once `configs/wp0/data.yaml: mec.path` is set and `seqnet.sequences.datasets.mec.load_session` reads the delivered file format.
 
 **Not done:**
 - MEC panels: Fig. 3E/F, Supp. 6A–C, Supp. 7 circles, Fig. 4H and Supp. 9I–K are blocked on [DATA].
@@ -69,7 +69,7 @@ Data notebooks: `braun_supp6` (bump fits), `braun_fig3` (Fig. 3 and Supp. 7), `b
 
 **Bat.** Braun's bat input was 168 observer time cells (mean z-scored rates over all hanging intervals). The public deposit of Omer, Las & Ulanovsky (2023), Zenodo 10.5281/zenodo.7213099 (CC BY 4.0), holds figure-level data only. The closest matrix is `Fig_2.mat → panel_a.correct`: 166 observer time cells, z-scored, 0.1-s bins from landing, apparently correct trials only. It is used as a **proxy**; the 166-vs-168 difference and the trial selection are recorded deviations. The raw files live in `data/bat_omer2023/` (gitignored, not redistributed).
 
-**Mouse MEC.** Blocked on [DATA] (D8). `seqnet.data.mec` implements the whole pipeline behind a single loader stub and is tested on a synthetic stand-in session. Every mouse cell in the notebooks is written and switches on when the path is set.
+**Mouse MEC.** Blocked on [DATA] (D8). `seqnet.sequences.datasets.mec` implements the whole pipeline behind a single loader stub and is tested on a synthetic stand-in session. Every mouse cell in the notebooks is written and switches on when the path is set.
 
 ## Results
 

@@ -11,7 +11,7 @@ A review of what exists, what works, what should change, and how to proceed. Det
 | WP-T: thesis framework (`seqnet.thesis`) | Complete except App. L (stub). Standalone, CLI, README | `seqnet/thesis/`, 77 tests in `tests/thesis/` |
 | Thesis Figs. 2–9 | One notebook per figure, panel by panel; 20 checks pass, 3 fail (all thesis discrepancies) | `seqnet/thesis/figures/`, `results/thesis/` |
 | Main-package core (spec §6.1–6.3, 6.7, 6.8, 6.10, 6.13–6.17) | Done | `seqnet/` |
-| Data layer: bat (proxy) and MEC (skeleton) | Bat working; MEC behind one loader stub | `seqnet/data/`, `configs/wp0/data.yaml` |
+| Data layer: bat (proxy) and MEC (skeleton) | Bat working; MEC behind one loader stub | `seqnet/sequences/datasets/`, `configs/wp0/data.yaml` |
 | Core tests T1–T9, T15, T17, data tests | 16 pass | `tests/core/` |
 | WP0 (Braun reproduction) | Every synthetic and bat panel; 14 notebooks; 34 checks pass, 8 fail (findings or settings) | `notebooks/wp0/`, `results/wp0/` |
 | Run infrastructure | Cached parallel runs with `meta.json` (config, commit, versions, seeds, time) | `seqnet/experiments/` |

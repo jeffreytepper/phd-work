@@ -2,8 +2,9 @@
 import numpy as np
 import pytest
 
-from seqnet.data import common, mec
-from seqnet.targets import SequenceSpec
+from seqnet.sequences import braun_sequence
+from seqnet.sequences.datasets import mec
+from seqnet.sequences.datasets import preprocessing as common
 
 
 def test_movmean_matches_matlab():
@@ -34,7 +35,7 @@ def test_fit_bump_bias_of_minimum_offset():
 def _fake_session(rng, N=60, n_seq=24, T_bins=1000):
     """A synthetic stand-in for the MEC session: travelling bumps with sequence durations jittered around T_bins."""
     acts, bounds, pos = [], [], 0
-    spec = SequenceSpec(N=N, T=1.0, amp=0.3, width=0.08, offset=0.1)
+    spec = braun_sequence(N=N, T=1.0, amp=0.3, width=0.08, offset=0.1)
     for s in range(n_seq):
         L = int(T_bins * rng.uniform(0.8, 1.0))
         t = np.linspace(0, 1, L, endpoint=False)

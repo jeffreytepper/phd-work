@@ -13,60 +13,15 @@ exact update time t0 + k dt; 'bin': at t0 + (k/m) * bin_size), ``weight_decay`` 
 from __future__ import annotations
 
 import time
-from dataclasses import asdict, dataclass, field
-from typing import Literal
 
 import numpy as np
 from scipy.special import expit
 
-from ..models.rate_rnn import RNNParams, noise_scale
-from ..targets import SequenceSpec, logit_target
+from ..models.rate_rnn import noise_scale
+from ..sequences import logit, training_target
+from .config import ForceConfig
 
 __all__ = ["ForceConfig", "train_realization", "realization_rng", "pearson"]
-
-
-@dataclass
-class ForceConfig:
-    """One training condition (Braun Methods 'FORCE-training of the RNNs'; defaults = synthetic setting)."""
-
-    # target (Braun eq. 4-6)
-    N: int = 501
-    T: float = 8.5
-    amp: float = 0.5
-    width: float = 1.7
-    offset: float = 0.0
-    eps: float = 0.01
-    # network (eq. 1-3)
-    tau: float = 0.3224
-    dt: float = 0.0081
-    noise_gain: float = 0.5
-    # training (eq. 7-9)
-    g_init: float = 1.5
-    p0: float = 0.08
-    m: int = 16
-    steps_per_iter: int = 2086
-    bin_size: float = 0.129
-    snippet_start_max: float = 119.2
-    n_train: int = 300
-    n_test: int = 10
-    # [VERIFY] switches (spec 6.7)
-    error_target: Literal["methods", "supplement"] = "methods"
-    c_uses_updated_P: bool = True
-    state_reset: bool = True
-    target_time: Literal["analytic", "bin"] = "analytic"
-    weight_decay: float = 0.0
-    mask: dict | None = None  # {"kind": "presyn_random"|"presyn_block"|"synapse_random", "fraction": f}
-    data: dict | None = None  # experimental target, see seqnet.data.registry (overrides N and the synthetic target)
-    seed: int = 0
-
-    def spec(self) -> SequenceSpec:
-        return SequenceSpec(self.N, self.T, self.amp, self.width, self.offset, self.eps)
-
-    def params(self) -> RNNParams:
-        return RNNParams(self.tau, self.dt, self.noise_gain)
-
-    def as_dict(self) -> dict:
-        return asdict(self)
 
 
 def realization_rng(seed: int, realization: int) -> np.random.Generator:
@@ -113,31 +68,14 @@ def train_realization(cfg: ForceConfig, realization: int, keep_W0: bool = False)
     m, K = cfg.m, cfg.steps_per_iter
     prm = cfg.params()
     n_up = (K - 1) // m + 1
-    if cfg.data:
-        # experimental target (Braun Methods lines 913-925): rates at bin_size; update u uses target bin start + u
-        from ..data.registry import load_target
-
-        F, bin_size = load_target(cfg.data)
-        N = F.shape[0]
-        J = cfg.g_init / np.sqrt(N) * rng.standard_normal((N, N))
-        sb = cfg.data.get("snippet_bins")
-        start = int(rng.integers(0, F.shape[1] - sb + 1)) if sb else 0
-        idx = np.clip(start + np.arange(n_up), 0, F.shape[1] - 1)
-        t0 = start * bin_size
-        f_z = F[:, idx]
-        x_z = logit_target(f_z, cfg.eps)
-        target = x_z if cfg.error_target == "methods" else x_z + cfg.tau * np.gradient(x_z, m * cfg.dt, axis=1)
-        h_init = x_z[:, 0].copy()
-    else:
-        N = cfg.N
-        spec = cfg.spec()
-        J = cfg.g_init / np.sqrt(N) * rng.standard_normal((N, N))
-        t0 = float(rng.uniform(0.0, cfg.snippet_start_max))
-        ks = np.arange(n_up) * m
-        tz = t0 + (ks * cfg.dt if cfg.target_time == "analytic" else np.arange(n_up) * cfg.bin_size)
-        f_z = spec.rates(tz)  # (N, n_up) target rates
-        target = spec.h_target(tz) if cfg.error_target == "methods" else spec.y_target(tz, cfg.tau)
-        h_init = spec.h_target(np.array([t0]))[:, 0]
+    seq = cfg.build_sequence()
+    N = seq.N
+    J = cfg.g_init / np.sqrt(N) * rng.standard_normal((N, N))
+    offsets = np.arange(n_up) * m * cfg.dt if cfg.target_time == "analytic" else np.arange(n_up) * cfg.bin_size
+    snip = seq.draw_snippet(rng, offsets, cfg.snippet_start_max)
+    t0, f_z = snip.t0, snip.rates  # (N, n_up) target rates
+    target = training_target(snip, cfg.error_target, cfg.tau, cfg.eps)
+    h_init = logit(f_z[:, :1], cfg.eps)[:, 0]  # x*(t0)
     keep = _mask_columns(cfg, rng, N)
     rowmask = None
     if keep is not None and keep.ndim == 2:

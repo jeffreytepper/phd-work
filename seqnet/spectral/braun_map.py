@@ -12,7 +12,7 @@ import numpy as np
 from scipy.special import expit
 
 from ..conventions import ifft, signed_modes, temporal_fourier
-from ..targets import SequenceSpec, logit_target, wrapped_gaussian
+from ..sequences import DEFAULT_EPS, StationaryWave, logit
 
 __all__ = [
     "bump_spectra",
@@ -25,16 +25,17 @@ __all__ = [
 ]
 
 
-def bump_spectra(spec: SequenceSpec, tau: float, n_t: int = 4096) -> dict:
+def bump_spectra(wave: StationaryWave, tau: float, n_t: int = 4096, eps: float = DEFAULT_EPS) -> dict:
     """Temporal Fourier coefficients of f0, x0*, y0* = x0* + tau dx0*/dt on all n_t bins (Braun Suppl. eq. 2, Sec. 2).
 
-    The bump of neuron 0 is sampled at t_b = b T / n_t.  y_hat_k = (1 + i k omega tau) x_hat_k exactly (Suppl. Sec. 2).
+    ``wave`` is the stationary view of a sequence (``TravelingBump.stationary()``).  The bump of neuron 0 is sampled at
+    t_b = b T / n_t.  y_hat_k = (1 + i k omega tau) x_hat_k exactly (Suppl. Sec. 2).
     """
-    t = np.arange(n_t) * spec.T / n_t
-    f0 = spec.amp * wrapped_gaussian(t, spec.width, spec.T, spec.n_images) + spec.offset
-    x0 = logit_target(f0, spec.eps)
+    t = np.arange(n_t) * wave.period / n_t
+    f0 = wave.profile(t)
+    x0 = logit(f0, eps)
     k = signed_modes(n_t)
-    w = 2 * np.pi / spec.T
+    w = wave.omega
     f_hat = temporal_fourier(f0)
     x_hat = temporal_fourier(x0)
     return {"k": k, "f_hat": f_hat, "x_hat": x_hat, "y_hat": (1 + 1j * k * w * tau) * x_hat,
@@ -42,11 +43,12 @@ def bump_spectra(spec: SequenceSpec, tau: float, n_t: int = 4096) -> dict:
 
 
 def required_eigs(
-    spec: SequenceSpec,
+    wave: StationaryWave,
     tau: float,
     K_max: int = 20,
     convention: Literal["supplement", "methods"] = "supplement",
     n_t: int = 4096,
+    eps: float = DEFAULT_EPS,
 ) -> dict[int, complex]:
     """Sequence-required eigenvalues lambda_k for |k| <= K_max.
 
@@ -55,7 +57,7 @@ def required_eigs(
       filter h_hat_k = x_hat_k / (1 + i k omega tau) and the realized rates are F' = phi(h); support W F' = x* gives
       lambda_k = x_hat_k / F'_hat_k (spec 6.10; [VERIFY] A1).
     """
-    sp = bump_spectra(spec, tau, n_t)
+    sp = bump_spectra(wave, tau, n_t, eps)
     k, w = sp["k"], sp["omega"]
     if convention == "supplement":
         num, den = sp["y_hat"], sp["f_hat"]
