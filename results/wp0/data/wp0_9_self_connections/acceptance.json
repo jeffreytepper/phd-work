@@ -1,0 +1,79 @@
+[
+ {
+  "item": "mean self-weight per ablation",
+  "criterion": "reported",
+  "value": {
+   "baseline": -1.989,
+   "noise_off": -0.034,
+   "p0_0.008": -0.169,
+   "p0_0.8": -3.159,
+   "standard_rls": -2.369,
+   "supplement_target": -1.989,
+   "no_state_reset": -1.995,
+   "final (Fig. 1)": -1.308
+  },
+  "passed": null
+ },
+ {
+  "item": "noise-free sequence kept and Floquet multipliers",
+  "criterion": "reported",
+  "value": {
+   "baseline": {
+    "kept": true,
+    "period_s": 8.71,
+    "leading_transverse": 0.0041
+   },
+   "noise_off": {
+    "kept": true,
+    "period_s": 8.8,
+    "leading_transverse": 0.0082
+   },
+   "p0_0.008": {
+    "kept": true,
+    "period_s": 8.72,
+    "leading_transverse": 0.0072
+   },
+   "p0_0.8": {
+    "kept": true,
+    "period_s": 8.63,
+    "leading_transverse": 0.0032
+   },
+   "standard_rls": {
+    "kept": true,
+    "period_s": 8.71,
+    "leading_transverse": 0.0038
+   },
+   "supplement_target": {
+    "kept": true,
+    "period_s": 8.5,
+    "leading_transverse": 0.0037
+   },
+   "no_state_reset": {
+    "kept": true,
+    "period_s": 8.45,
+    "leading_transverse": 0.005
+   },
+   "final (Fig. 1)": {
+    "kept": true,
+    "period_s": 8.85,
+    "leading_transverse": 0.0047
+   }
+  },
+  "passed": null
+ },
+ {
+  "item": "T17 on trained networks: flow multiplier ~1 where the sequence is kept",
+  "criterion": "|flow - 1| < 5 * closure + 1e-3",
+  "value": [
+   1.0005802407501463,
+   1.000955050542991,
+   1.0008855622204917,
+   1.001060073599259,
+   1.0006968639223681,
+   1.0004125342348087,
+   1.0006468686092456,
+   1.0006764912432315
+  ],
+  "passed": true
+ }
+]

@@ -30,7 +30,6 @@ Data notebooks: `braun_supp6` (bump fits), `braun_fig3` (Fig. 3 and Supp. 7), `b
 **Not done:**
 - MEC panels: Fig. 3E/F, Supp. 6A–C, Supp. 7 circles, Fig. 4H and Supp. 9I–K are blocked on [DATA].
 - Supp. 2 (sparsity, WP0.4): all three mask types are implemented. Mask (c), one P_i per row, runs at reduced settings for fractions 0.75–0.95 only, because memory is N·L² per network.
-- WP0.9 ablations.
 
 ## Settings
 
@@ -116,6 +115,29 @@ Data notebooks: `braun_supp6` (bump fits), `braun_fig3` (Fig. 3 and Supp. 7), `b
 - **k ≥ 3–4.** Errors are order 1 (median ≈ 100%). These modes lie below the shrinkage scale. The learned eigenvalues do *not* shrink toward 0 as §5 predicts; they sit on a floor at the self-weight (phase ±π). A diagonal of value s adds s to every λ_k, and the learned diagonal is −1.3.
 - **Removing the self-weight** (d = 0 replaced by its neighbours) makes k = 1–2 worse (up to 4.6×). The diagonal is therefore part of how the learned matrix supports the active modes, not a separable artefact. This motivates WP0.9.
 - **Verdict on H0's second part:** Cor. 3.2 holds quantitatively on the strongly represented modes (k ≤ 2) under either convention, with `methods` marginally better. Beyond them, §5's shrinkage toward zero is not what FORCE does; the learned spectrum is pinned by the strongly negative diagonal. Reported as a finding, no tuning.
+
+### WP0.9: origin of the negative self-connections (new)
+
+Ablations on the Fig. 1 target (dev settings), plus the Floquet analysis of realisation 1 without noise (`seqnet.analysis.stability`). Notebook: `wp0_9_self_connections`.
+
+| Condition | Mean self-weight | Test corr | Profile corr with baseline (d ≠ 0) | Noise-free period | Leading transverse multiplier |
+| --- | --- | --- | --- | --- | --- |
+| baseline | −1.99 | 0.87 | 1 | 8.71 s | 0.004 |
+| noise off | **−0.03** | 0.97 | 0.81 | 8.80 s | 0.008 |
+| p = 0.008 | −0.17 | 0.87 | 0.98 | 8.72 s | 0.007 |
+| p = 0.8 | −3.16 | 0.85 | 0.98 | 8.63 s | 0.003 |
+| standard RLS step (A2) | −2.37 | 0.87 | 1.00 | 8.71 s | 0.004 |
+| y\* target (`supplement`, A1) | −1.99 | 0.89 | 0.99 | **8.50 s** | 0.004 |
+| no state reset (A3) | −2.00 | **0.14** | 1.00 | 8.45 s | 0.005 |
+| final settings (Fig. 1) | −1.31 | 0.88 | 0.97 | 8.85 s | 0.005 |
+
+**Findings:**
+1. **The self-connection spike is a noise-correction term.** It vanishes without injected noise (−0.03), and its magnitude grows with the RLS prior scale p (−0.17, −1.99, −3.16 for p = 0.008, 0.08, 0.8) and shrinks with longer training (−1.31 at final settings).
+   - RLS fits the noisy input z = Jr + ζ to x\*, so each neuron learns to inhibit its own noise-driven excursions.
+   - The spike is not part of the sequence solution. It is what shifts every learned eigenvalue by the diagonal in WP0.8.
+2. **The training convention sets the speed (A1, confirmed).** Training toward x\* (Methods eq. 7) gives a free-running period of 8.6–8.85 s, 1–4% slower than the target; training toward y\* = x\* + τẋ\* gives exactly 8.50 s. This is the lag the spec predicted for the `methods` convention.
+3. **State reset is required (A3).** Without it, test correlation collapses (0.14): the free-running period differs from 8.5 s, so the phase drifts across iterations. The default (reset) is the consistent reading of the Methods.
+4. **All trained networks keep the sequence without noise** on a strongly attracting orbit: flow multiplier 1.0004–1.0011 (T17 holds on trained networks), transverse multipliers < 0.01 per period.
 
 **Interpretation of the bat motif result.** The data-trained mean matrix shows vertical stripes: presynaptic neurons project with consistent sign. Under Braun eq. 15 this registers as τ_con. Braun report banding only in data-trained networks (mouse τ_div ≈ 0.72); here it appears weakly in τ_con for the bat. τ_rec is 0.04 in the data network versus 0.63 in the synthetic control, matching Supp. 7's "mismatch between data and synthetic motifs". This feeds WP5.1 (banding from heterogeneity).
 
