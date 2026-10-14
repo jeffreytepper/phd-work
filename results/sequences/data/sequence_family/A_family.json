@@ -1,0 +1,53 @@
+{
+ "figure": "sequence_family",
+ "panel": "A_family",
+ "params": {
+  "braun": {
+   "kind": "braun",
+   "N": 501,
+   "T": 8.5,
+   "amp": 0.5,
+   "width": 1.7,
+   "offset": 0.0
+  },
+  "cosine_k1": {
+   "kind": "lehr_bump",
+   "N": 501,
+   "k": 1
+  },
+  "cosine_k4": {
+   "kind": "lehr_bump",
+   "N": 501,
+   "k": 4
+  },
+  "rectangle_k4": {
+   "kind": "lehr_bump",
+   "N": 501,
+   "k": 4,
+   "eps": 0.0
+  },
+  "sparse_k4": {
+   "kind": "lehr_bump",
+   "N": 501,
+   "k": 4,
+   "p_inh": 0.8,
+   "seed": 1
+  },
+  "network": {
+   "kind": "time_scaled",
+   "period": 8.5,
+   "sequence": {
+    "kind": "lehr_network",
+    "N": 501,
+    "duration": 20.0,
+    "gain": 1.0,
+    "record_every": 5
+   }
+  }
+ },
+ "time": "2026-10-14 13:30:25",
+ "git": {
+  "commit": "327e2ffcd3d2fa240d5400a51b525a05ac604d61",
+  "dirty_seqnet": true
+ }
+}

@@ -1,6 +1,8 @@
 """Sequences known on a uniform time grid (simulated networks, recordings), linearly interpolated in between."""
 from __future__ import annotations
 
+from functools import cached_property
+
 import numpy as np
 
 from .base import Sequence
@@ -60,9 +62,11 @@ class SampledSequence(Sequence):
     def rates(self, t):
         return self._interp(self.samples, t)
 
-    def rates_dt(self, t):
+    @cached_property
+    def _samples_dt(self) -> np.ndarray:
         if self.periodic:
-            d = (np.roll(self.samples, -1, axis=1) - np.roll(self.samples, 1, axis=1)) / (2 * self.dt)
-        else:
-            d = np.gradient(self.samples, self.dt, axis=1)
-        return self._interp(d, t)
+            return (np.roll(self.samples, -1, axis=1) - np.roll(self.samples, 1, axis=1)) / (2 * self.dt)
+        return np.gradient(self.samples, self.dt, axis=1)
+
+    def rates_dt(self, t):
+        return self._interp(self._samples_dt, t)

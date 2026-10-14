@@ -1,0 +1,31 @@
+{
+ "figure": "sequence_family",
+ "panel": "E_shape",
+ "params": {
+  "k": 4,
+  "cycles": 3,
+  "width_pulses": [
+   -0.5,
+   0.0,
+   0.6
+  ],
+  "pulse": {
+   "t_peak": 12.75,
+   "width": 2.0
+  },
+  "drives": [
+   -0.75,
+   0.0,
+   1.0
+  ],
+  "drive_pulse": {
+   "t_peak": 1.5,
+   "width": 0.25
+  }
+ },
+ "time": "2026-10-14 13:30:32",
+ "git": {
+  "commit": "327e2ffcd3d2fa240d5400a51b525a05ac604d61",
+  "dirty_seqnet": true
+ }
+}

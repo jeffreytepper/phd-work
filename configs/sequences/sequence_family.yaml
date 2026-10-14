@@ -1,0 +1,66 @@
+# Demo of seqnet.sequences: the family of training sequences from Braun et al. (2026) to Lehr, Kumar & Tetzlaff (2024),
+# all on one clock (Braun's 8.5-s cycle).  Every entry under `members` is a seqnet.sequences spec (build_sequence).
+N: 501
+period: 8.5                  # s, the common training timescale (seqnet.sequences.BRAUN_PERIOD)
+raster_dt: 0.05              # s, sampling of the plotted rasters
+members:                     # panel A
+  braun:        {kind: braun, N: 501, T: 8.5, amp: 0.5, width: 1.7, offset: 0.0}
+  cosine_k1:    {kind: lehr_bump, N: 501, k: 1}
+  cosine_k4:    {kind: lehr_bump, N: 501, k: 4}
+  rectangle_k4: {kind: lehr_bump, N: 501, k: 4, eps: 0.0}
+  sparse_k4:    {kind: lehr_bump, N: 501, k: 4, p_inh: 0.8, seed: 1}
+  network:      {kind: time_scaled, period: 8.5, sequence: {kind: lehr_network, N: 501, duration: 20.0, gain: 1.0, record_every: 5}}
+shapes:                      # panel B
+  widths_k: [1, 2, 4, 8]
+  morph_k: 4
+  morph_eps: [0.0, 0.05, 0.3, 1.0, 5.0, null]
+geometry:                    # panel C (Lehr Fig. 1c-e)
+  widths_k: [1, 1.5, 2, 3, 4, 6, 8, 12, 16]
+  example_k: [1, 2, 4]
+  harmonics: [1, 2, 3, 4]
+speed:                       # panel D (Lehr Fig. 4): gain S(t) over 4 cycles, bump k = 4
+  k: 4
+  cycles: 4
+  gains:
+    step:        {kind: step, before: 1.0, after: 2.5, t_step: 17.0}
+    exp_decay:   {kind: exponential, baseline: 1.0, scale: 2.0, rate: -0.15}
+    slow_growth: {kind: exponential, baseline: 0.0, scale: 0.6, rate: 0.04}
+    fast_growth: {kind: exponential, baseline: 0.0, scale: 0.4, rate: 0.08}
+    sigmoid:     {kind: sigmoid, low: 0.5, high: 2.5, t_mid: 17.0, width: 2.0}
+    concave:     {kind: parabola, vertex: 2.5, curvature: -0.0068, t_vertex: 17.0}
+    convex:      {kind: parabola, vertex: 0.5, curvature: 0.0068, t_vertex: 17.0}
+    sinusoid:    {kind: sinusoid, mean: 1.5, amplitude: 1.0, period: 17.0}
+shape_control:               # panel E (Lehr Fig. 2): transient width (parametric) and E - I drive (network)
+  k: 4
+  cycles: 3
+  width_pulses: [-0.5, 0.0, 0.6]          # height of a Gaussian pulse in the width scale
+  pulse: {t_peak: 12.75, width: 2.0}
+  drives: [-0.75, 0.0, 1.0]               # height of a Gaussian E - I pulse in the network (model time);
+                                          # at S = 1 a pulse below about -0.8 extinguishes the bump
+  drive_pulse: {t_peak: 1.5, width: 0.25}
+subspaces:                   # panel F (Lehr Fig. 1h-k, 5j)
+  k: 1
+  p_inh: [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+  n_seeds: 5
+  example_p: 0.8
+  switch_cycles: 2                        # ensemble 1 -> 2 after this many cycles (4 in total)
+network:                     # panel G (Lehr Fig. 3, S3, 2a); model time
+  gains: [1, 2, 3, 5, 8, 11, 15, 25, 50, 100, 200, 500, 1000]
+  shifts: [0.02, 0.04, 0.06]
+  drives: [-0.75, -0.5, -0.25, 0.0, 0.25, 0.75, 1.25]   # constant E - I at S = 1; -0.8 and below extinguish the bump
+  duration: 1.0
+  controlled:                             # one run with all three controls, then rescaled to the training clock
+    kind: lehr_network
+    N: 501
+    duration: 6.0
+    gain: {kind: step, before: 1.0, after: 2.5, t_step: 2.0}
+    drive: {kind: gaussian_pulse, baseline: 0.0, height: 1.0, t_peak: 4.5, width: 0.3}
+    participation:
+      kind: switching
+      switch_times: [3.0]
+      stages: [{kind: all_active}, {kind: random_silencing, p_inh: 0.7, seed: 2}]
+training:                    # panel H: a small FORCE demo (not final settings)
+  members: [braun, cosine_k4, sparse_k4, network]
+  n_realizations: 3
+  n_train: 100
+  n_test: 10

@@ -1,0 +1,85 @@
+[
+ {
+  "item": "A: every member's rates lie in [0, 1]",
+  "value": [
+   0.0,
+   1.0
+  ],
+  "passed": true
+ },
+ {
+  "item": "A: network rescaled to the training period (s)",
+  "value": 8.499983,
+  "passed": true
+ },
+ {
+  "item": "C: a k = 1 bump spans one plane (dims for 90% variance)",
+  "value": 2,
+  "passed": true
+ },
+ {
+  "item": "C: dimensionality rises as the bump narrows",
+  "value": [
+   2,
+   3,
+   4,
+   6,
+   8,
+   11,
+   15,
+   23,
+   30
+  ],
+  "passed": true
+ },
+ {
+  "item": "D: measured speed follows the gain (worst median relative error)",
+  "value": 1.0918165977757965e-05,
+  "passed": true
+ },
+ {
+  "item": "E: width pulses shrink / grow the k = 1 radius (min, max vs baseline)",
+  "value": [
+   0.5154260855903058,
+   1.5011127850158872
+  ],
+  "passed": true
+ },
+ {
+  "item": "F: principal angle vs arccos(1 - p) (max deviation of the mean, deg)",
+  "value": 2.173697021256018,
+  "passed": true
+ },
+ {
+  "item": "G: saturation speeds at S = 1000 (rot/s; Fig. S3 about 19 / 38 / 58)",
+  "value": [
+   19.0,
+   39.0,
+   59.0
+  ],
+  "passed": true
+ },
+ {
+  "item": "G: E - I widens the bump monotonically",
+  "value": [
+   0.195,
+   0.224,
+   0.25,
+   0.275,
+   0.299,
+   0.35,
+   0.4
+  ],
+  "passed": true
+ },
+ {
+  "item": "H: FORCE test correlation per member (demo settings)",
+  "value": {
+   "braun": 0.856,
+   "cosine_k4": 0.831,
+   "sparse_k4": 0.836,
+   "network": 0.921
+  },
+  "passed": null
+ }
+]

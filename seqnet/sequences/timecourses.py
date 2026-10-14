@@ -18,7 +18,7 @@ from scipy.special import erf
 from .registry import Registry
 
 __all__ = ["TimeCourse", "TIMECOURSES", "as_timecourse", "Constant", "Step", "Exponential", "Sigmoid", "Parabola",
-           "Sinusoid", "GaussianPulse"]
+           "Sinusoid", "GaussianPulse", "Scaled"]
 
 
 class TimeCourse(ABC):
@@ -206,3 +206,28 @@ class GaussianPulse(TimeCourse):
         c = self.width * np.sqrt(np.pi / 2)
         r = np.sqrt(2) * self.width
         return self.baseline * t + self.height * c * (erf((t - self.t_peak) / r) - erf(-self.t_peak / r))
+
+
+@TIMECOURSES.register("scaled")
+@dataclass(frozen=True)
+class Scaled(TimeCourse):
+    """factor * course(t): e.g. a base speed N / period times a dimensionless gain S(t)."""
+
+    course: TimeCourse
+    factor: float = 1.0
+
+    def __post_init__(self):
+        object.__setattr__(self, "course", as_timecourse(self.course))
+
+    def __call__(self, t):
+        return self.factor * self.course(t)
+
+    def derivative(self, t):
+        return self.factor * self.course.derivative(t)
+
+    def integral(self, t):
+        return self.factor * self.course.integral(t)
+
+    @property
+    def is_constant(self) -> bool:
+        return self.course.is_constant

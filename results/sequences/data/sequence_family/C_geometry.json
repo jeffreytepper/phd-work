@@ -1,0 +1,33 @@
+{
+ "figure": "sequence_family",
+ "panel": "C_geometry",
+ "params": {
+  "widths_k": [
+   1,
+   1.5,
+   2,
+   3,
+   4,
+   6,
+   8,
+   12,
+   16
+  ],
+  "example_k": [
+   1,
+   2,
+   4
+  ],
+  "harmonics": [
+   1,
+   2,
+   3,
+   4
+  ]
+ },
+ "time": "2026-10-14 13:30:27",
+ "git": {
+  "commit": "327e2ffcd3d2fa240d5400a51b525a05ac604d61",
+  "dirty_seqnet": true
+ }
+}

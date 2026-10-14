@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import numpy as np
 
-__all__ = ["bump_position", "bump_speed"]
+__all__ = ["bump_position", "bump_speed", "mean_period"]
 
 
 def bump_position(rates: np.ndarray) -> np.ndarray:
@@ -17,3 +17,12 @@ def bump_position(rates: np.ndarray) -> np.ndarray:
 def bump_speed(rates: np.ndarray, dt: float) -> np.ndarray:
     """Instantaneous bump speed (neurons / s) between successive columns."""
     return np.diff(bump_position(rates)) / dt
+
+
+def mean_period(rates: np.ndarray, dt: float) -> float:
+    """Mean cycle duration (s): N over the mean speed from the first to the last column."""
+    pos = bump_position(rates)
+    travelled = abs(pos[-1] - pos[0])
+    if travelled == 0:
+        raise ValueError("the bump does not move")
+    return rates.shape[0] * (rates.shape[1] - 1) * dt / travelled

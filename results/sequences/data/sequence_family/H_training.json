@@ -1,0 +1,20 @@
+{
+ "figure": "sequence_family",
+ "panel": "H_training",
+ "params": {
+  "members": [
+   "braun",
+   "cosine_k4",
+   "sparse_k4",
+   "network"
+  ],
+  "n_realizations": 3,
+  "n_train": 100,
+  "n_test": 10
+ },
+ "time": "2026-10-14 13:30:47",
+ "git": {
+  "commit": "327e2ffcd3d2fa240d5400a51b525a05ac604d61",
+  "dirty_seqnet": true
+ }
+}

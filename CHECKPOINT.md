@@ -14,6 +14,7 @@ A review of what exists, what works, what should change, and how to proceed. Det
 | Data layer: bat (proxy) and MEC (skeleton) | Bat working; MEC behind one loader stub | `seqnet/sequences/datasets/`, `configs/wp0/data.yaml` |
 | Core tests T1–T9, T15, T17, data tests | 16 pass | `tests/core/` |
 | WP0 (Braun reproduction) | Every synthetic and bat panel; 14 notebooks; 34 checks pass, 8 fail (findings or settings) | `notebooks/wp0/`, `results/wp0/` |
+| Sequences (`seqnet.sequences`) | All targets behind one interface: Braun waves, the Lehr et al. 2024 family (parametric and ring network), datasets; one 8.5-s training clock; demo notebook, 10 checks pass | `seqnet/sequences/`, `notebooks/sequences/`, `results/sequences/` |
 | Run infrastructure | Cached parallel runs with `meta.json` (config, commit, versions, seeds, time) | `seqnet/experiments/` |
 
 Not built yet: `seqnet/bridge.py`; `models/driven_ring.py`, `gain_ring.py`, `ei_ring.py`; `training/kernel_rule.py`;

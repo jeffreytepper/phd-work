@@ -1,0 +1,27 @@
+{
+ "figure": "sequence_family",
+ "panel": "F_subspaces",
+ "params": {
+  "k": 1,
+  "p_inh": [
+   0.0,
+   0.1,
+   0.2,
+   0.3,
+   0.4,
+   0.5,
+   0.6,
+   0.7,
+   0.8,
+   0.9
+  ],
+  "n_seeds": 5,
+  "example_p": 0.8,
+  "switch_cycles": 2
+ },
+ "time": "2026-10-14 13:30:38",
+ "git": {
+  "commit": "327e2ffcd3d2fa240d5400a51b525a05ac604d61",
+  "dirty_seqnet": true
+ }
+}

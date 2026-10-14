@@ -23,9 +23,11 @@ import numpy as np
 from .base import SEQUENCES, Sequence, StationaryWave
 from .participation import PARTICIPATION, AllActive, Participation, RandomSilencing
 from .profiles import PROFILES, BumpProfile, MorphedCosine, RaisedCosine, WrappedGaussian
-from .timecourses import Constant, TimeCourse, as_timecourse
+from .timecourses import Constant, Scaled, TimeCourse, as_timecourse
 
-__all__ = ["TravelingBump", "braun_sequence", "lehr_bump"]
+__all__ = ["TravelingBump", "braun_sequence", "lehr_bump", "BRAUN_PERIOD"]
+
+BRAUN_PERIOD = 8.5  # s, Braun et al. synthetic target period: the reference training timescale
 
 
 @SEQUENCES.register("traveling_bump")
@@ -99,7 +101,7 @@ class TravelingBump(Sequence):
 
 
 @SEQUENCES.register("braun")
-def braun_sequence(N: int = 501, T: float = 8.5, amp: float = 0.5, width: float = 1.7, offset: float = 0.0,
+def braun_sequence(N: int = 501, T: float = BRAUN_PERIOD, amp: float = 0.5, width: float = 1.7, offset: float = 0.0,
                    n_images: int = 6) -> TravelingBump:
     """Braun et al. Methods eq. 4-5: f_n(t) = a g_{sigma,T}(t - n T/N) + b, sigma = ``width`` in seconds."""
     return TravelingBump(N=N, profile=WrappedGaussian(n_images), width=width * N / T, speed=Constant(N / T),
@@ -107,19 +109,22 @@ def braun_sequence(N: int = 501, T: float = 8.5, amp: float = 0.5, width: float 
 
 
 @SEQUENCES.register("lehr_bump")
-def lehr_bump(N: int = 1000, k: float = 1.0, eps: float | None = None, amplitude=1.0, speed=None, width_scale=1.0,
-              p_inh: float = 0.0, seed: int = 0, participation=None, offset: float = 0.0,
+def lehr_bump(N: int = 1000, k: float = 1.0, eps: float | None = None, amplitude=1.0, period: float = BRAUN_PERIOD,
+              gain=1.0, width_scale=1.0, p_inh: float = 0.0, seed: int = 0, participation=None, offset: float = 0.0,
               phase0: float = 0.0) -> TravelingBump:
     """Lehr, Kumar & Tetzlaff (2024) Methods eq. 1-7 in their parameters.
 
     k: width of the bump as the support N/k (k >= 1); eps: shape, None for the raised cosine psi_k (eq. 5), else
-    Phi_{k,eps} (eq. 3; 0 = rectangle); amplitude A (number or time course); speed: dc/dt in neurons/s (number or
-    time course, default N, one cycle per second); p_inh, seed: neurons silenced by P (eq. 7), unless an explicit
-    ``participation`` (e.g. switching ensembles) is given.
+    Phi_{k,eps} (eq. 3; 0 = rectangle); amplitude A (number or time course); p_inh, seed: neurons silenced by P
+    (eq. 7), unless an explicit ``participation`` (e.g. switching ensembles) is given.
+
+    Time: the bump moves at dc/dt = (N / period) S(t).  ``period`` (s) is the cycle duration at gain 1, by default
+    Braun's T = 8.5 s so that the family shares one training timescale; ``gain`` S(t) is the speed control of Lehr
+    Fig. 3-4 (number or time course).
     """
     if k < 1:
         raise ValueError("k >= 1 (the bump support N/k cannot exceed the ring)")
     profile = RaisedCosine() if eps is None else MorphedCosine(float(eps))
     part = participation if participation is not None else RandomSilencing(p_inh, seed)
-    return TravelingBump(N=N, profile=profile, width=N / k, speed=float(N) if speed is None else speed,
-                         amplitude=amplitude, width_scale=width_scale, offset=offset, participation=part, phase0=phase0)
+    return TravelingBump(N=N, profile=profile, width=N / k, speed=Scaled(gain, N / period), amplitude=amplitude,
+                         width_scale=width_scale, offset=offset, participation=part, phase0=phase0)
